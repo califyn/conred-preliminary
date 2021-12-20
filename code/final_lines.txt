@@ -24,8 +24,8 @@
 # python train.py --mode=pretraining --path_dir=nosite_2 @sota_args.txt --rand_shuffle
 # python train.py --mode=pretraining --path_dir=nosite_3 @sota_args.txt --rand_shuffle
 # python train.py --mode=pretraining --path_dir=twomods_1 @sota_args.txt --contrastive=rna-seq,reports
-python train.py --mode=pretraining --path_dir=twomods_2 @sota_args.txt --contrastive=rna-seq,reports
-python train.py --mode=pretraining --path_dir=twomods_3 @sota_args.txt --contrastive=rna-seq,reports
+# python train.py --mode=pretraining --path_dir=twomods_2 @sota_args.txt --contrastive=rna-seq,reports
+# python train.py --mode=pretraining --path_dir=twomods_3 @sota_args.txt --contrastive=rna-seq,reports
 
 # python train.py --mode=pretraining --path_dir=final_1 @sota_args.txt
 # python train.py --mode=pretraining --path_dir=final_2 @sota_args.txt

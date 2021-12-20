@@ -3,6 +3,8 @@ import time
 import traceback
 import multiprocessing
 
+# script that runs multiple tests
+
 def run_line(cmd):
     try:
         with open("rs_log.txt", "a") as f:
@@ -41,9 +43,6 @@ def clear(cmd):
         for line in lines:
             f.write(line + "\n")
 
-#all_clear = False
-#while not all_clear:
-#    all_clear = True
 with open("final_lines.txt", "r") as f:
     ls = f.read().split("\n")
     for line in ls:

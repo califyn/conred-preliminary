@@ -4,6 +4,9 @@ import model
 import datasets
 import json
 
+# script to do very fast (and casual) tests in command line
+# use, exec(open("load_model.py").read())
+
 g_dataset = None
 g_encoder = None
 g_lr = None
@@ -28,19 +31,19 @@ def load_dataset_and_model(path_dir, num=-1):
 
     if num == -1:
         print("fetching most recent model (CTRL+C if this isn't what you want!")
-        file_cand = most_recent_file("../../save/" + path_dir) 
+        file_cand = most_recent_file("../save/" + path_dir) 
         num = file_cand[file_cand.rfind("/"):file_cand.rfind(".")]
         num = int(num)
         print("num is", num)
         input("confirm")
 
-    with open("../../save/" + path_dir + "/" + str(num) + ".args") as f:
+    with open("../save/" + path_dir + "/" + str(num) + ".args") as f:
         args = json.load(f)
     if args["mode"] == "validate":
         dataset = datasets.TCGADataset(lr_data=[args["left"]], target=args["target"])
 
         encoder = model.TCGAEncoders(data_types=[args["left"]], dataset=dataset, mode=args["mode"])[0]
-        encoder.load_state_dict(torch.load("../../save/" + path_dir + "/" + str(num) + ".pth")["state_dict"])
+        encoder.load_state_dict(torch.load("../save/" + path_dir + "/" + str(num) + ".pth")["state_dict"])
 
         g_dataset = dataset
         g_encoder = encoder

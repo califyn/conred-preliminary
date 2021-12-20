@@ -3,6 +3,8 @@ import time
 import traceback
 import multiprocessing
 
+# run script for hyperparameter tuning
+
 def run_line(cmd, gpu):
     if gpu == 0:
         try:

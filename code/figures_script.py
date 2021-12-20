@@ -24,7 +24,6 @@ import pandas as pd
 import json 
 import scipy.stats
 import os
-#from sklearn.metrics import roc_curve, auc
 from sklearn.metrics import RocCurveDisplay
 
 os.environ["CUDA_VISIBLE_DEVICES"] = ''

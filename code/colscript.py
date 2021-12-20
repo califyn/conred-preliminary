@@ -2,7 +2,9 @@ import pandas as pd
 import json
 from collections import OrderedDict
 
-df = pd.read_csv("../../tcga/new/huge_clinical_data.tsv", sep='\t', header=0, dtype='str')
+# view columns of the data
+
+df = pd.read_csv("../tcga/huge_clinical_data.tsv", sep='\t', header=0, dtype='str')
 cols = df.columns.tolist()
 
 lcols = []
@@ -18,6 +20,4 @@ dcols = OrderedDict()
 for it, c in enumerate(cols):
     dcols[c] = lcols[it]
 
-#print("\n".join(cols))
-#print(lcols)
 print(json.dumps(dcols, indent=4))
