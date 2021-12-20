@@ -1505,9 +1505,7 @@ def main(args):
             args.eval_epoch = -1
 
     has_saved = os.path.isfile(os.path.join(args.path_dir, f"{args.eval_epoch}.args")) 
-    print(has_saved, args.eval_epoch)
     new_weights = args.new_weights or (not has_saved)
-    print(new_weights, "new weights")
 
     if new_weights:
         if args.contrastive == "":
@@ -1560,7 +1558,6 @@ def main(args):
         else:
             datahandler = datasets.TCGADataHandler(contrastive=args.contrastive, zero_shot=args.zero_shot, finetune=args.finetune, train_ratio=args.train_ratio, ft_train_ratio=args.ft_train_ratio, lg_types=args.lg_types, rna_thresh=args.rna_thresh, clin_thresh=args.clin_thresh, rna_set=args.rna_set, rand_shuffle=args.rand_shuffle, lm_arch=args.lm_arch, clin_one_hot=(args.clin_arch == 'mlp'))
             encoders = model.TCGAEncoders(data_types=args.contrastive, datahandler=datahandler, mode=args.mode, rep_dim=args.repr_dim, rna_hidden=args.rna_hidden, trns_arch=args.lm_arch, clin_arch=args.clin_arch, clin_hidden=args.clin_hidden, cheads=args.cheads, cdepth=args.cdepth, cdropout=args.cdropout, nocombine=args.nocombine, inter_attn=args.inter_attn, cdims=args.cdims)
-            print(encoders)
             
             try:
                 os.mkdir(os.path.join(args.path_dir, "dataset"))

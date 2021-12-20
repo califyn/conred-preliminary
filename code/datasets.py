@@ -198,7 +198,6 @@ def TCGA_Indicator_Dataset(args=None):
                 return -1
 
         ret = list(df["necrosis"].iloc[lines])
-        print([x for x in ret if str(x) != 'nan'][:20], "ret 20 necorsis")
     elif args["prop"] == "ulceration":
         def yn_map(x):
             if isinstance(x, str) and "no" in x.lower() and "[" not in x.lower():
@@ -388,7 +387,6 @@ def TCGA_NLIndicator_Dataset(args=None):
     # ret = list(map(yn_map, zip(ret, types)))
     # ret = ["None"] + ret
     types = [x if okay_key(ret[it]) else None for it, x in enumerate(types)]
-    print(types.count(None), args["prop"])
 
     positives = ["None" if t == None else pos(t) for t in types]
     negatives = ["None" if t == None else neg(t) for t in types]
@@ -616,7 +614,6 @@ def TCGA_Reports_Dataset(args=None, input_txt=None):
         if input_txt == None:
             inn = []
 
-            print("reports")
             for it, id in enumerate(args["ids"]):
                 if it % 100 == 0:
                     if verbose:
@@ -719,12 +716,10 @@ class TCGADataHandler():
             c_tt_idx = [id for id in ids if not all([id not in l for l in z_tt_idx])]
         else:
             c_tt_idx = [id for id in ids]
-        print(c_tt_idx[:100], "pre shuffle")
         if not rand_shuffle:
             c_tt_idx = site_shuffle(c_tt_idx, rand)
         else:
             random.shuffle(c_tt_idx)
-        print(c_tt_idx[:100], "post shuffle")
         c_pretrain_idx = c_tt_idx[:floor(len(c_tt_idx) * train_ratio)] 
         c_test_idx = c_tt_idx[floor(len(c_tt_idx) * train_ratio):] 
 
@@ -776,10 +771,7 @@ class TCGADataHandler():
 
         self.pretrain = torch.utils.data.Subset(dataset, c_pretrain_idx)
         self.clip_test = torch.utils.data.Subset(dataset, c_test_idx)
-        print(len(self.pretrain), "pretrain")
-        print(len(self.clip_test), "clipests")
         temp = [y[5:7] for y in c_test_idx]
-        print([x[5:7] for x in self.pretrain if x in temp], "site intersection")
 
         self.val_train = {}
         self.val_test = {}
@@ -788,16 +780,10 @@ class TCGADataHandler():
             self.val_train[z] = torch.utils.data.Subset(dataset, z_train_idx[it])
             self.val_test[z] = torch.utils.data.Subset(dataset, z_test_idx[it])
             self.val_train_mini[z] = torch.utils.data.Subset(dataset, z_train_idx[it][::10])
-            print(len(self.val_train[z]), z)
-            print(len(self.val_test[z]), z)
-            print(len(self.val_train_mini[z]), z, "mini")
         for it, f in enumerate(finetune):
             self.val_train[f] = torch.utils.data.Subset(dataset, f_train_idx[it])
             self.val_test[f] = torch.utils.data.Subset(dataset, f_test_idx[it])
             self.val_train_mini[f] = torch.utils.data.Subset(dataset, f_train_idx[it][::10])
-            print(len(self.val_train[f]), f)
-            print(len(self.val_test[f]), f)
-            print(len(self.val_train_mini[f]), f, "mini")
 
         self.num_types = int(torch.max(self._dataset[:]["type"]).item() + 1)
         self.tokenizer = transformers.AutoTokenizer.from_pretrained('distilbert-base-uncased')
