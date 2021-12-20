@@ -43,7 +43,7 @@ import torchmetrics
 from torch.nn.parallel import DistributedDataParallel as DDP
 
 # local imports
-import datasets # TODO: make sure this import actually works
+import datasets 
 import model
 from tabtransformer.tabtransformer.tab_transformer_pytorch import CombTabTransformer
 from sync_batchnorm.sync_batchnorm import convert_model
@@ -107,16 +107,6 @@ def pwint(*args, sep=None):
     args = sep.join(args)
     with open(log_file, 'a') as f:
         f.write(args + "\n")
-
-def setup(rank, world_size):
-    os.environ['MASTER_ADDR'] = 'localhost'
-    os.environ['MASTER_PORT'] = '12355'
-
-    # initialize the process group
-    dist.init_process_group("nccl", rank=rank, world_size=world_size)
-
-def cleanup():
-    dist.destroy_process_group()
 
 class LRScheduler(object):
     """
@@ -223,7 +213,6 @@ def _uni_info_nce(z1, z2, temperature=0.1, distance="cosine", both_sides=True, r
         labels = targets
     elif both_sides:
         labels = torch.arange(0, 2 * n, dtype=torch.long)
-        #labels = labels + (1 - labels % 2)
         labels[:n] = labels[:n] + n
         labels[n:] = labels[n:] - n
         labels = labels.tolist()
@@ -273,9 +262,9 @@ def confusion_matrix_str(cm, normalize=True, figs=3, label_names=None):
 
     n = np.size(cm, axis=0)
     #color_scale = ["\u001b[38;5;$17m", "\u001b[38;5;$60m", "\u001b[38;5;$109m", "\u001b[38;5;$137m", "\u001b[38;5;$167m", "\u001b[38;5;$196m"]
-    color_scale = ["", "", "", "", "", ""]
     #bold = "\033[1m"
     #reset = "\u001b[0m"
+    color_scale = ["", "", "", "", "", ""]
     bold = ""
     reset = ""
     bounds = np.array([0, 0.2, 0.4, 0.6, 0.8])
@@ -389,14 +378,6 @@ def clip_acc(z1, z2, distance="cosine", as_confusion_matrix=False, labels=None, 
 
                 nb_mini = nb_mini - torch.arange(0, class_sizes[-1]).cuda()
                 class_accs.append(torch.numel(torch.where(nb_mini == 0)[0]) / class_sizes[-1]) 
-            # correct = [0] * label_size
-            # total = [0] * label_size
-            # for i in range(label_size):
-            #     for it, pair in enumerate(pairs):
-            #         if pair == [i, i]:
-            #             if neighbors[it] == targets[it]:
-            #                 correct[i] = correct[i] + 1
-            #             total[i] = total[i] + 1
             return class_accs, class_sizes, cm
         else:
             return cm
@@ -404,131 +385,6 @@ def clip_acc(z1, z2, distance="cosine", as_confusion_matrix=False, labels=None, 
 def validate(args, encoder, datahandler):
     encoder = evaluate_single(args, [encoder], datahandler, -1, clip_inv=False) 
     return encoder
-
-    # dataset
-    # dataloader_kwargs = dict(drop_last=True, pin_memory=False, num_workers=0)
-    # train_loader = torch.utils.data.DataLoader(
-    #     dataset=train_dataset,
-    #     shuffle=True,
-    #     batch_size=args.bsz,
-    #     **dataloader_kwargs
-    # )
-    # test_loader = torch.utils.data.DataLoader(
-    #     dataset=test_dataset,
-    #     shuffle=True,
-    #     batch_size=args.bsz,
-    #     **dataloader_kwargs
-    # )
-
-    # if verbose:
-    #     print("[Validation] Completed data loading")
-
-
-    # # optimization
-    # optimizers = []
-    # if isinstance(encoder, model.TransformerWithMLP):
-    #     trns_optimizer = torch.optim.AdamW(encoder.trns.parameters(), lr=args.l_lr[0], weight_decay=args.wd)
-    #     mlp_optimizer = torch.optim.SGD(encoder.mlp.parameters(), lr=args.l_lr[1], weight_decay=args.wd, momentum=args.p) # TODO: should i use two different optimizers? or just one
-    #     
-    #     optimizers += [trns_optimizer, mlp_optimizer]
-    # elif isinstance(encoder, model.SimpleMLP):
-    #     mlp_optimizer = torch.optim.SGD(encoder.parameters(), lr=args.g_lr, momentum=args.p)
-
-    #     optimizers += [mlp_optimizer]
-    # input(optimizers)
-    # encoder = torch.nn.DataParallel(encoder)
-    # #lr_scheduler = LRScheduler(
-    # #    optimizer=optimizer,
-    # #    warmup_epochs=args.warmup_epochs,
-    # #    warmup_lr=0,
-    # #    num_epochs=args.epochs,
-    # #    base_lr=args.lr * args.bsz / 256,
-    # #    final_lr=0,
-    # #    iter_per_epoch=len(train_loader),
-    # #    constant_predictor_lr=True
-    # #)
-
-    # if verbose:
-    #     print("[Validation] Model generation complete, training begins")
-
-    # # logging
-    # start = time.time()
-    # os.makedirs(args.path_dir, exist_ok=True)
-    # torch.save(dict(epoch=0, state_dict=encoder.state_dict()), os.path.join(args.path_dir, '0.pth'))
-
-    # data_args = vars(args)
-
-    # is_classification = train_dataset[:]["target"]
-    # is_classification = torch.all((is_classification - torch.round(is_classification)) == 0)
-    # if is_classification:
-    #     loss_type = "cross_entropy"
-    # else:
-    #     loss_type = "mean_square"
-
-    # with open(os.path.join(args.path_dir, '0.args'), 'w') as fp:
-    #     json.dump(data_args, fp, indent=4)
-
-    # saved_loss = "None"
-    # saved_var = "None"
-
-    # for e in range(1, args.epochs + 1):
-    #     if e % args.progress_every == 0:
-    #         with torch.no_grad():
-    #             print("epoch ", e, "!")
-    #             print("loss: ", saved_loss)
-    #             print("var: ", saved_var)
-    #             acc = 0
-    #             total = 0
-    #             for it, elem in enumerate(test_loader):
-    #                 out = torch.argmax(encoder(elem["left"]), dim=1)
-
-    #                 if loss_type == "cross_entropy":
-    #                     to_add = torch.where(out == elem["target"])[0].size()
-    #                 elif loss_type == "mean_square":
-    #                     to_add = torch.where(out == torch.argmax(elem["target"], dim=1))[0].size()
-
-    #                 if len(to_add) == 0:
-    #                     to_add = 1
-    #                 else:
-    #                     to_add = to_add[0]
-    #                 acc += to_add
-    #                 total += elem["target"].size()[0]
-    #             print("accuracy: ", acc / total)
-    #     
-    #     encoder.train()
-
-    #     temp_saved_loss = []
-    #     for it, elem in tenumerate(train_loader):
-    #         encoder.zero_grad()
-
-    #         if loss_type == "cross_entropy":
-    #             loss = torch.nn.CrossEntropyLoss()
-    #             out = encoder(elem["left"])
-    #             saved_var = torch.mean(torch.std(out, dim=0))
-    #             l = loss(out, elem["target"].long())
-    #         elif loss_type == "mean_square":
-    #             loss = torch.nn.MSELoss()
-    #             out = encoder(elem["left"])
-    #             saved_var = torch.mean(torch.std(out, dim=0))
-    #             l = loss(out, elem["target"])
-    #         temp_saved_loss.append(float(l.item()))
-
-    #         l.backward()
-    #         for optimizer in optimizers:
-    #             optimizer.step()
-    #     saved_loss = torch.mean(torch.Tensor(temp_saved_loss))
-
-    #     if e % args.save_every == 0:
-    #         torch.save(dict(epoch=0, state_dict=encoder.state_dict()), os.path.join(args.path_dir, f'{e}.pth'))
-
-    #         with open(os.path.join(args.path_dir, f'{e}.args'), 'w') as fp:
-    #             json.dump(data_args, fp, indent=4)
-    #         print("[saved]")
-
-    # if verbose:
-    #     print("[Validation] Training complete")
-
-    # return encoder
 
 def evaluate_single(args, encoders, datahandler, save_num, clip_inv=True, tasks=[-1], encoder_idx=0, finetune=True, expensive=False):
     dataloader_kwargs = dict(drop_last=True, pin_memory=False, num_workers=0)
@@ -575,7 +431,6 @@ def evaluate_single(args, encoders, datahandler, save_num, clip_inv=True, tasks=
             else:
                 num_rep = 1
             for _ in tqdm(range(num_rep)):
-                #for it, elem in tenumerate(val_loader):
                 for it, elem in enumerate(val_loader):
                     with torch.no_grad():
                         base_out = encoders[encoder_idx](elem[args.contrastive[encoder_idx]])
@@ -583,7 +438,6 @@ def evaluate_single(args, encoders, datahandler, save_num, clip_inv=True, tasks=
 
                         acc.append(clip_acc(base_out, comp_out, distance=distance))
                         loss.append(info_nce([base_out, comp_out], distance=distance).item())
-                        #_, _, cm = clip_acc(base_out, comp_out, distance=distance, as_confusion_matrix=True, labels=elem["type"], label_size=datahandler.num_types)
                         pc1, pc2, cm = clip_acc(base_out, comp_out, distance=distance, as_confusion_matrix=True, labels=elem["type"], label_size=datahandler.num_types)
                         
                     cms.append(cm)
@@ -613,11 +467,6 @@ def evaluate_single(args, encoders, datahandler, save_num, clip_inv=True, tasks=
                                 
                                 y_true_site = [x[5:7] for x in y_true_id]
                                 y_pred_site = [x[5:7] for x in y_pred_id]
-                                #print(f"sites {sorted(list(set(y_true_site)))}")
-                                #print(f"y true {y_true_site}")
-                                #print(f"y pred {y_pred_site}")
-                                #print(f"num matches {len([it for it in range(len(y_true_site)) if y_true_site[it] == y_pred_site[it]])}")
-                                #print(f"num bad matches {len([it for it in range(len(y_true_site)) if y_true_site[it] == y_pred_site[it] and y_true_id[it] != y_pred_id[it]])}")
                                 overpredict_rat.append(len([it for it in range(len(y_true_site)) if y_true_site[it] == y_pred_site[it]]) / len(y_true) * len(list(set(y_true_site))))
                                 overpredict_adj.append(len([it for it in range(len(y_true_site)) if y_true_site[it] == y_pred_site[it] and y_true_id[it] != y_pred_id[it]]) / len(y_true) * len(list(set(y_true_site))))
 
@@ -705,26 +554,11 @@ def evaluate_single(args, encoders, datahandler, save_num, clip_inv=True, tasks=
                     pwint(np.mean(np.array(overpredict_rat)), "overprediction of same site")
                     pwint(np.mean(np.array(overpredict_adj)), "overprediction of same site (adjusted)")
 
-            # file_to_update.write(f"Data type {dtype}")
-            # file_to_update.write(f"Val acc: {np.around(acc, 3)} | {np.around(np.mean(acc), 3)}")
-            # file_to_update.write(f"Val loss: {np.around(loss, 3)} | {np.around(np.mean(loss), 3)}")
-            # file_to_update.write(f"Confusion matrix: \n {confusion_matrix_str(cms)}")
-            # if expensive:
-            #     file_to_update.write("Indices | Within-Class Acc. | Mean Class Size | Model Class Size")
-            #     file_to_update.write("".join('{:>6}'.format(datahandler.nl_type_map[i]) for i in range(0, datahandler.num_types))[1:])
-            #     file_to_update.write("".join('{:>6}'.format(str(x)) for x in list(np.around(pcs_acc * 100, 1)))[1:])
-            #     file_to_update.write("".join('{:>6}'.format(str(x)) for x in list(np.around(pcs_sample, 1)))[1:])
-            #     file_to_update.write("".join('{:>6}'.format(str(x)) for x in list(np.around(1 / pcs_acc, 1)))[1:])
-            #     file_to_update.write(f"{pcs_manual} manual")
-            #     file_to_update.write(f"{pcs_msample} sample")
-            # file_to_update.flush()
-
     ft_encoders = []
     if expensive and len(tasks) > 0:
         pwint(f"[Evaluate] begin evaluation on tasks {tasks}")
 
         for it, task in enumerate(tasks):
-            #if finetune:
             pwint(f"[Evaluate] begin task {task} evaluation ({it} out of {len(tasks)})")
 
             train_loader = torch.utils.data.DataLoader(
@@ -740,69 +574,6 @@ def evaluate_single(args, encoders, datahandler, save_num, clip_inv=True, tasks=
 
             if "_nl" not in task:
                 pass
-                
-                # output_nclasses = int(max(torch.max(datahandler.val_train[task][:][task]).item(), torch.max(datahandler.val_test[task][:][task]).item()) + 1)
-
-                # ft_encoder = model.WithFinetuneLayers(encoders[encoder_idx], args.repr_dim, output_size=output_nclasses, size=[])
-                # ft_encoders.append(ft_encoder)
-
-                # if finetune:
-                #     model_optimizer = torch.optim.AdamW(ft_encoder.model.parameters(), lr=args.ft_lr[0], weight_decay=args.wd)
-                # ft_optimizer = torch.optim.AdamW(ft_encoder.finetune.parameters(), lr=args.ft_lr[1], weight_decay=args.wd)
-
-                # for e in range(1, 2 + args.ft_epochs):
-                #     # evaluate
-                #     ft_encoder.eval()
-
-                #     correct = 0
-                #     total = 0
-                #     saved_loss = []
-                #     with torch.no_grad():
-                #         for it, elem in enumerate(test_loader):
-                #             out = ft_encoder(elem[args.contrastive[encoder_idx]])
-
-                #             if output_nclasses != 2:
-                #                 loss = torch.nn.CrossEntropyLoss()
-                #                 l = loss(out, elem[task].long())
-                #             else:
-                #                 loss = torch.nn.BCEWithLogitsLoss()
-                #                 l = loss(out, torch.nn.functional.one_hot(elem[task].long(), num_classes=output_nclasses).float())
-                #             saved_loss.append(float(l.item()))
-
-                #             out = torch.argmax(out, dim=1)
-                #             correct += torch.numel(torch.where(out == elem[task])[0])
-                #             total += int(elem[list(elem.keys())[0]].size()[0])
-                #     pwint(f"[Evaluate] on epoch {e - 1}, task {task}: accuracy {round(correct/total, 3)}")
-                #     # file_to_update.write(f"epoch {e - 1} & task {task} & zero shot: accuracy {round(correct/total, 3)}")
-                #     pwint(f"test loss: {np.mean(np.array(saved_loss))}")
-
-                #     #if e > args.ft_epochs:
-                #     #    if save_num != -1:
-                #     #        torch.save(dict(epoch=0, state_dict=ft_encoder.state_dict()), os.path.join(args.path_dir, str(save_num) + "-" + task + ".pth"))
-                #     #    break
-
-                #     # train
-                #     ft_encoder.train()
-
-                #     pwint(f"[Evaluate] epoch: {e} out of {args.ft_epochs}")
-                #     saved_loss = []
-                #     for it, elem in enumerate(train_loader):
-                #         out = ft_encoder(elem[args.contrastive[encoder_idx]]) 
-
-                #         if output_nclasses != 2:
-                #             loss = torch.nn.CrossEntropyLoss()
-                #             l = loss(out, elem[task].long())
-                #         else:
-                #             loss = torch.nn.BCEWithLogitsLoss()
-                #             l = loss(out, torch.nn.functional.one_hot(elem[task].long(), num_classes=output_nclasses).float())
-                #         saved_loss.append(float(l.detach().item()))
-
-                #         l.backward()
-                #         if finetune:
-                #             model_optimizer.step()
-                #         ft_optimizer.step()
-                #     pwint(f"train loss: {np.mean(np.array(saved_loss))}")
-
             else:
                 ft_encoder = deepcopy(encoders[encoder_idx].module)
                 if "reports" in args.contrastive:
@@ -812,9 +583,6 @@ def evaluate_single(args, encoders, datahandler, save_num, clip_inv=True, tasks=
                 else:
                     raise ValueError("nl target but can't find nl encoder")
                 
-                # ft_optimizer = torch.optim.AdamW(ft_encoder.parameters(), lr=args.ft_lr[0], weight_decay=args.wd)
-                # nl_optimizer = torch.optim.AdamW(nl_encoder.parameters(), lr=args.ft_lr[0], weight_decay=args.wd)
-
                 label_size = torch.numel(torch.unique(datahandler.val_train[task][:][task[:-3]]))
 
                 for e in range(1, 2 + args.ft_epochs):
@@ -822,17 +590,12 @@ def evaluate_single(args, encoders, datahandler, save_num, clip_inv=True, tasks=
                     ft_encoder.eval()
                     nl_encoder.eval()
 
-                    #acc = []
-                    #cm = []
                     true = []
                     predict = []
                     ids = []
                     with torch.no_grad():
                         for it, elem in enumerate(test_loader):
                             ft_out = torch.unsqueeze(ft_encoder(elem[args.contrastive[encoder_idx]]), 1)
-                            #nl_out = nl_encoder(elem["reports"])
-                            #nl_out = nl_encoder(elem[task])
-                            #nl_out = nl_encoder(datahandler.nl_prompts[task])
                             nl_out = torch.stack((
                                     nl_encoder({
                                         "input_ids": elem[task]["neg_input_ids"],
@@ -844,30 +607,17 @@ def evaluate_single(args, encoders, datahandler, save_num, clip_inv=True, tasks=
                                     })
                             ), dim=2)
 
-                            #acc.append(clip_acc(ft_out, nl_out, distance=distance, remove_duplicates=True))
-                            #cmmm = clip_acc(ft_out, nl_out, distance=distance, as_confusion_matrix=True, labels=elem[task[:-3]], label_size=label_size)[2]
-                            #num_ones = torch.sum(elem[task[:-3]]) / torch.numel(elem[task[:-3]])
-                            #acc.append(float((cmmm[0, 0] / (cmmm[0, 0] + cmmm[0, 1]) * (1 - num_ones) + cmmm[1, 1] / (cmmm[1, 1] + cmmm[1, 0])  * num_ones).item()))
-                            #cm.append(cmmm) 
                             assert(distance == 'cosine')
                             ft_out = torch.nn.functional.normalize(ft_out, dim=2)
                             nl_out = torch.nn.functional.normalize(nl_out, dim=1)
 
-                            #dist = ft_out @ nl_out.T
                             dist = torch.squeeze(torch.bmm(ft_out, nl_out), dim=1)
                             dist = 1 / (1 + torch.exp(dist[:, 0] - dist[:, 1])) # softmax
                             true = true + elem[task[:-3]].tolist()
                             predict = predict + dist.detach().tolist()
                             ids = ids + list(elem["id"][0])
 
-                    #auroc.append(roc_auc_score(elem[task[:-3]], dist)
-                    #pwint(np.array(true))
-                    #pwint(np.array(predict))
-                    # print(np.unique(true), "True")
-                    # print(len(true), true[:50], "true shape")
-                    # print(np.min(np.array(predict)), np.max(np.array(predict)), "pred")
-                    # print(len(predict), predict[:50], "pred shape")
-                    print("temporary fix;;;;;;; get rid of this asap")
+                    # print("temporary fix;;;;;;; get rid of this asap")
                     true = np.array(true)
                     predict = np.array(predict)
                     ids = [id for it, id in enumerate(ids) if true[it] != -1]
@@ -881,101 +631,18 @@ def evaluate_single(args, encoders, datahandler, save_num, clip_inv=True, tasks=
                         task + "-pred": predict
                     }).to_csv(os.path.join(args.path_dir, f"{save_num}-{task}.csv")) 
                             
-                    #acc = np.mean(np.array(acc))
-                    #cm = np.array(cm)
-                    #if len(cm.shape) > 2:
-                    #    cm = np.mean(cm, axis=0)
-                    #pwint(f"[Evaluate] on epoch {e - 1}, task {task}: accuracy {round(float(acc), 3)}")
-                    #pwint(f"[Evaluate] cofusion matrix: {confusion_matrix_str(cm, label_names=[str(x) for x in range(label_size)])}")
-                    # file_to_update.write(f"epoch {e - 1} & task {task} & zero shot: accuracy {round(float(acc), 3)}")
-
-                    # if e > args.ft_epochs:
-                        #if save_num != -1:
-                        #    torch.save(dict(epoch=0, state_dict=ft_encoder.state_dict()), os.path.join(args.path_dir, str(save_num) + "-" + task + ".pth"))
                     break
-
-                    # train
-                    # ft_encoder.train()
-                    # nl_encoder.train()
-
-                    # pwint(f"[Evaluate] nl-epoch: {e} out of {args.ft_epochs}")
-                    # for it, elem in enumerate(train_loader):
-                    #     ft_out = ft_encoder(elem[args.contrastive[encoder_idx]])
-                    #     nl_out = nl_encoder(elem[task])
-
-                    #     l = _uni_info_nce(ft_out, nl_out, distance=distance, remove_duplicates=True, both_sides=False)
-
-                    #     l.backward()
-                    #     if finetune:
-                    #         model_optimizer.step()
-                    #     ft_optimizer.step()
-            # else:
-            #     output_nclasses = int(max(torch.max(datahandler.val_train[task][:][task]).item(), torch.max(datahandler.val_test[task][:][task]).item()) + 1)
-
-            #     if output_nclasses != 2:
-            #         raise ValueError("have not implemented non finetuning for more than 2 classes")
-
-            #     train_outs = []
-            #     train_targets = []
-            #     test_outs = []
-            #     test_targets = []
-            #     
-            #     train_loader = torch.utils.data.DataLoader(
-            #             dataset=datahandler.val_train[task],
-            #             shuffle=True,
-            #             batch_size=args.val_bsz,
-            #             **dataloader_kwargs)
-            #     test_loader = torch.utils.data.DataLoader(
-            #             dataset=datahandler.val_test[task],
-            #             shuffle=True,
-            #             batch_size=args.val_bsz // 4,
-            #             **dataloader_kwargs)
-
-            #     for it, elem in enumerate(train_loader):
-            #         train_outs.append(torch.nn.functional.normalize(encoders[encoder_idx](elem[args.contrastive[encoder_idx]]).detach().cpu(), dim=1).numpy())
-            #         train_targets.append(elem[task].detach().cpu().numpy())
-
-            #     for it, elem in enumerate(test_loader):
-            #         test_outs.append(torch.nn.functional.normalize(encoders[encoder_idx](elem[args.contrastive[encoder_idx]]).detach().cpu(), dim=1).numpy())
-            #         test_targets.append(elem[task].detach().cpu().numpy())
-
-            #     train_outs = np.array(train_outs)
-            #     test_outs = np.array(test_outs)
-            #     train_targets = np.array(train_targets)
-            #     test_targets = np.array(test_targets)
-
-            #     print(train_outs.shape)
-            #     print(test_outs.shape)
-            #     train_outs = np.reshape(train_outs, (np.size(train_outs, axis=0) * np.size(train_outs, axis=1), args.repr_dim))
-            #     test_outs = np.reshape(test_outs, (np.size(test_outs, axis=0) * np.size(test_outs, axis=1), args.repr_dim))
-            #     train_targets = np.reshape(train_targets, (-1, ))
-            #     test_targets = np.reshape(test_targets, (-1, ))
-
-            #     results = []
-            #     
-            #     for i in range(args.ft_trials):
-            #         clf = LogisticRegression().fit(train_outs, train_targets)
-            #         results.append(clf.score(test_outs, test_targets))
-            #     results = np.array(results)
-            #     #results = np.array([0, 0, 1])
-
-            #     print(f"Logistic classifier accuracy on task {task}: {np.mean(results)}")
-            #     file_to_update.write(f"Logistic classifier accuracy on task {task}: {np.mean(results)}")
-            #     file_to_update.flush()
-            #     torch.cuda.empty_cache()
 
     return ft_encoders
 
-#datahandler = None
-
 def write_all(args, encoders, datahandler):
-    #columns = ['is_test'] + args.contrastive + [t[:-3] for t in args.finetune if t[-3:] == '_nl']
+    # write all outputs for easy linreg tests, etc.
+
     columns = ['is_test']
     for c in args.contrastive:
         columns = columns + [c + '-' + str(i) for i in range(args.repr_dim)]
     for t in args.finetune:
         if t[-3:] == '_nl':
-            #columns = columns + [t[:-3]] + [t + '-neg-' + str(i) for i in range(args.repr_dim)] + [t + '-pos-' + str(i) for i in range(args.repr_dim)]
             columns = columns + [t[:-3]]
 
     df = pd.DataFrame(columns=columns)
@@ -1003,93 +670,22 @@ def write_all(args, encoders, datahandler):
     with torch.no_grad():
         for (test_indicator, loader) in zip((False, True), (train_loader, test_loader)):
             for elem in loader:
-                #temp_df = pd.DataFrame(columns=columns)
                 temp_nd = np.zeros((len(elem["id"][0]), len(columns))).astype('float64')
 
                 for it, c in enumerate(args.contrastive):
                     out = encoders[it](elem[c]).detach().cpu().numpy()
                     temp_nd[:, 1 + args.repr_dim * it:1 + args.repr_dim * (it + 1)] = out
-
-                    #for it2, id in enumerate(elem["id"][0]):
-                    #    df[id, c] = out[it2]
-
-                # for it2, id in enumerate(elem["id"][0]):
-                #     for task in finetune:
-                #         df[id, task[:-3]] = out[finetune][it2]
-                #     df[id, "id"] = id
-                #     df[id, "is_test"] = test_indicator
-                #temp_df["id"] = elem["id"][0]
-                #temp_df["is_test"] = test_indicator
                 temp_nd[:, 0] = test_indicator
 
                 add_it = 1 + args.repr_dim * len(args.contrastive)
                 for task in args.finetune:
                     if task[-3:] == "_nl":
                         temp_nd[:, add_it] = elem[task[:-3]].cpu().numpy()
-                        # ft_out = torch.unsqueeze(encoders[args.contrastive.index("rna-seq")](elem["rna-seq"]), 1)
-                        # nl_out = torch.stack((
-                        #         encoders[args.contrastive.index("reports")]({
-                        #             "input_ids": elem[task]["neg_input_ids"],
-                        #             "attention_mask": elem[task]["neg_attention_mask"]
-                        #         }),
-                        #         encoders[args.contrastive.index("reports")]({
-                        #             "input_ids": elem[task]["pos_input_ids"],
-                        #             "attention_mask": elem[task]["pos_attention_mask"]
-                        #         })
-                        # ), dim=2)
-
-                        # ft_out = torch.nn.functional.normalize(ft_out, dim=2)
-                        # nl_out = torch.nn.functional.normalize(nl_out, dim=1)
-
-                        # dist = torch.squeeze(torch.bmm(ft_out, nl_out), dim=1)
-                        # dist = 1 / (1 + torch.exp(dist[:, 0] - dist[:, 1])) # softmax
-                        # #predict = predict + dist.detach().tolist()
-                        # temp_df[add_it] = dist.detach().numpy()
-                        # add_it = add_it + 1
-                        #temp_df[task[:-3]] = elem[task]
-                        #temp_nd[:, add_it] = elem[task[:-3]].cpu().numpy()
-                        
-                        #print(task)
-                        #print(encoders[args.contrastive.index("reports")])
-                        #ok_rows = torch.where(elem[task]["neg_input_ids"][:, 0] != -1)[0].cpu().numpy()
-                        #a1 = encoders[args.contrastive.index("reports")]({
-                        #                "input_ids": elem[task]["neg_input_ids"][ok_rows],
-                        #                "attention_mask": elem[task]["neg_attention_mask"][ok_rows]
-                        #            })
-                        #print("finished a1")
-                        #print(encoders[args.contrastive.index("reports")])
-                        #final_a1 = np.full((len(elem["id"][0]), a1.size()[1]), -1.0)
-                        #final_a1[ok_rows] = a1.cpu().numpy()
-                        #a2 = encoders[args.contrastive.index("reports")]({
-                        #                "input_ids": elem[task]["pos_input_ids"][ok_rows],
-                        #                "attention_mask": elem[task]["pos_attention_mask"][ok_rows]
-                        #            })
-                        #print("finished a2")
-                        #final_a2 = np.full((len(elem["id"][0]), a2.size()[1]), -1.0)
-                        #final_a2[ok_rows] = a2.cpu().numpy()
-                        #nl_out = np.concatenate((final_a1, final_a2), axis=1)
-                        # nl_out = torch.cat((
-                        #             encoders[args.contrastive.index("reports")]({
-                        #                 "input_ids": elem[task]["neg_input_ids"],
-                        #                 "attention_mask": elem[task]["neg_attention_mask"]
-                        #             }),
-                        #             encoders[args.contrastive.index("reports")]({
-                        #                 "input_ids": elem[task]["pos_input_ids"],
-                        #                 "attention_mask": elem[task]["pos_attention_mask"]
-                        #             })
-                        #     ), dim=0)
-                        #temp_nd[:, add_it + 1:add_it + 1 + 2 * args.repr_dim] = nl_out
-
-                        #add_it = add_it + 1 + 2 * args.repr_dim
-
-                #print(temp_nd, "temp nd")
-                #print(df, "df pre")
                 df = df.append(pd.DataFrame(
                     data=temp_nd,
                     index=elem["id"][0],
                     columns=columns
                 ))
-                #print(df, "df post")
 
     print(df.head(10))
     print(df.tail(10))
@@ -1097,162 +693,7 @@ def write_all(args, encoders, datahandler):
     df.to_csv(args.path_dir + "/outputs.csv")
     return 
 
-def demo_basic(rank, world_size, args):
-    torch.cuda.set_device(rank)
-    print(f"Running basic DDP example on rank {rank}.")
-    setup(rank, world_size)
-    print(f"{rank} going to sleep...")
-    time.sleep(rank * 10)
-    print(f"{rank} waking up...")
-
-    global datahandler
-
-    dataloader_kwargs = dict(drop_last=True, pin_memory=False, num_workers=0)
-    sampler = torch.utils.data.distributed.DistributedSampler(datahandler.pretrain, num_replicas=world_size, rank=rank, shuffle=True)
-    train_loader = torch.utils.data.DataLoader(
-        dataset=datahandler.pretrain,
-        shuffle=False,
-        batch_size=args.bsz,
-        sampler=sampler,
-        **dataloader_kwargs
-    )
-    if verbose:
-        pwint("[Pretraining] Completed data loading")
-
-    ddp_models = []
-    encoders = model.TCGAEncoders(data_types=args.contrastive, datahandler=datahandler, mode=args.mode, rep_dim=args.repr_dim, gpu=rank)
-    for encoder in encoders:
-        print(rank, "rank of encoder")
-        torch.cuda.set_device(rank)
-        encoder.cuda(rank)
-        ddp_models.append(DDP(encoder, device_ids=[rank], output_device=rank))
-    encoders = ddp_models
-    #for it, encoder in enumerate(encoders):
-    #    if rank == 0:
-    #        ddp_models.append(DDP(encoders[it], device_ids=[rank]))
-    #    else:
-    #        encoder_copy = deepcopy(encoders[it])
-    #        torch.cuda.set_device(rank)
-    #        encoder_copy.cuda(rank)
-    #        ddp_models.append(DDP(encoder_copy, device_ids=[rank]))
-    #encoders = ddp_models
-
-    # optimization
-    optimizers = []
-    for encoder in encoders:
-        if isinstance(encoder, model.TransformerWithMLP):
-            trns_optimizer = torch.optim.AdamW(encoder.module.trns.parameters(), lr=args.l_lr[0], weight_decay=args.wd)
-            mlp_optimizer = torch.optim.AdamW(encoder.module.mlp.parameters(), lr=args.l_lr[1], weight_decay=args.wd)
-            
-            optimizers += [mlp_optimizer]
-        elif isinstance(encoder, model.SimpleMLP):
-            mlp_optimizer = torch.optim.AdamW(encoder.parameters(), lr=args.g_lr, weight_decay=args.wd)
-
-            optimizers += [mlp_optimizer] # TODO: use the LRscheduler
-        elif isinstance(encoder, CombTabTransformer):
-            trns_optimizer = torch.optim.AdamW(encoder.parameters(), lr=args.c_lr, weight_decay=args.wd)
-
-            optimizers += [trns_optimizer]
-
-    if verbose:
-        pwint("[Pretraining] Model generation complete, training begins")
-
-    # logging
-    start = time.time()
-    # file_to_update = open(os.path.join(args.path_dir, 'training_loss.log'), 'w') 
-    if rank == 0:
-        os.makedirs(args.path_dir, exist_ok=True)
-        for encoder, dtype in zip(encoders, args.contrastive):
-            #if len(args.gpu) > 1:
-            #    torch.save(dict(epoch=0, state_dict=encoder.module.state_dict()), os.path.join(args.path_dir, "0-" + name + ".pth"))
-            #else: # TODO: note that this will force it to be loaded with nn.DataParallel again
-            torch.save(dict(epoch=0, state_dict=encoder.state_dict()), os.path.join(args.path_dir, "0-" + dtype + ".pth"))
-
-        data_args = vars(args)
-
-        with open(os.path.join(args.path_dir, '0.args'), 'w') as fp:
-            json.dump(data_args, fp, indent=4)
-
-    saved_loss = [-1]
-    saved_vars = []
-    for x in args.contrastive:
-        saved_vars.append([-1])
-
-    distance = "cosine"
-    if args.euclidean:
-        distance = "euclidean"
-
-    for e in range(1, args.epochs + 1):
-        sampler.set_epoch(e)
-        if e % args.progress_every == 0:
-            with torch.no_grad():
-                pwint("epoch ", e, "!")
-                pwint("loss: ", torch.mean(torch.Tensor(saved_loss)))
-                for it, dtype in enumerate(args.contrastive):
-                    pwint(f"{dtype} var:", torch.mean(torch.Tensor(saved_vars[it])))
-
-        for encoder in encoders:
-            encoder.train()
-
-        saved_loss = []
-        for var in saved_vars:
-            var = []
-
-        for it, elem in tenumerate(train_loader):
-            for encoder in encoders:
-                encoder.zero_grad()
-
-            outs = []
-            for it, dtype in enumerate(args.contrastive):
-                outs.append(encoders[it](datahandler.mask(elem[dtype], ratio=args.mask))) # TODO: remove the final layer when evaluating (ie make the last layer a projector)
-            l = info_nce(outs, distance=distance)
-
-            saved_loss.append(l.detach().item())
-            for it, out in enumerate(outs):
-                saved_vars[it].append(torch.mean(torch.std(out, dim=0)).detach())
-
-            l.backward()
-            for encoder in encoders:
-                torch.nn.utils.clip_grad_norm_(encoder.parameters(), args.clip)
-            for optimizer in optimizers:
-                optimizer.step()
-            torch.cuda.empty_cache()
-
-        if rank == 0 and e % args.val_every == 0:
-            #evaluate_single(args, [encoder.module for encoder in encoders], datahandler, e, tasks=[])
-            evaluate_single(args, encoders, datahandler, e, tasks=[])
-
-        if rank == 0 and e % args.eval_every == 0:
-            #evaluate_single(args, [encoder.module for encoder in encoders], datahandler, e, expensive=True)
-            evaluate_single(args, encoders, datahandler, e, expensive=True)
-
-        if rank == 0 and e % args.save_every == 0:
-            for encoder, name in zip(encoders, args.contrastive):
-                torch.save(dict(epoch=0, state_dict=encoder.state_dict()), os.path.join(args.path_dir, f'{e}-{name}.pth'))
-
-            with open(os.path.join(args.path_dir, f'{e}.args'), 'w') as fp:
-                json.dump(data_args, fp, indent=4)
-            pwint("[saved]")
-
-    if verbose:
-        pwint("[Pretraining] Training complete")
-
-    cleanup()
-
 def pretrain(args, encoders, datahandler):
-    # world_size=4
-    # mp.spawn(demo_basic,
-    #          args=(world_size,args),
-    #          nprocs=world_size,
-    #          join=True)
-
-    # for it, encoder in enumerate(encoders):
-    #     checkpoint = torch.load(os.path.join(args.path_dir, f"{args.num_epochs}-{args.contrastive[it]}.pth"))
-    #     torch.nn.modules.utils.consume_prefix_in_state_dict_if_present(checkpoint['model_dict'],prefix='module.')
-    #     encoder.load_state_dict(checkpoint)
-
-    # return encoders
-
     # dataset
     dataloader_kwargs = dict(drop_last=True, pin_memory=False, num_workers=0)
     if args.site_batch != 1:
@@ -1306,12 +747,10 @@ def pretrain(args, encoders, datahandler):
                     constant_predictor_lr=True,
                     flat_warmup=False
             )
-
-            # lr_schedulers += [trns_lr_scheduler, mlp_lr_scheduler]
         elif isinstance(encoder, model.SimpleMLP):
             mlp_optimizer = torch.optim.AdamW(encoder.parameters(), lr=args.g_lr, weight_decay=args.wd)
 
-            optimizers += [mlp_optimizer] # TODO: use the LRscheduler
+            optimizers += [mlp_optimizer]
 
             lr_scheduler = LRScheduler(
                     optimizer=mlp_optimizer,
@@ -1344,14 +783,9 @@ def pretrain(args, encoders, datahandler):
             )
 
             lr_schedulers += [lr_scheduler]
-    # dataparallel (multi gpu) TODO: use DistributedDataParallel for speedup
     if len(args.gpu) > 1:
         multi_encoders = []
         for encoder in encoders:
-            #int_gpu = [int(x) for x in string_to_list(args.gpu)]
-            #print(int_gpu, "int gpu")
-            #multi_encoders.append(nn.DataParallel(encoder, device_ids=int_gpu))
-            #multi_encoders.append(convert_model(nn.DataParallel(encoder.to(args.gpu[0]), device_ids=args.gpu)).cuda())
             multi_encoders.append(convert_model(nn.DataParallel(encoder)).cuda())
         encoders = multi_encoders
 
@@ -1361,12 +795,8 @@ def pretrain(args, encoders, datahandler):
 
     # logging
     start = time.time()
-    # file_to_update = open(os.path.join(args.path_dir, 'training_loss.log'), 'w') 
     os.makedirs(args.path_dir, exist_ok=True)
     for encoder, dtype in zip(encoders, args.contrastive):
-        #if len(args.gpu) > 1:
-        #    torch.save(dict(epoch=0, state_dict=encoder.module.state_dict()), os.path.join(args.path_dir, "0-" + name + ".pth"))
-        #else: # TODO: note that this will force it to be loaded with nn.DataParallel again
         torch.save(dict(epoch=0, state_dict=encoder.state_dict()), os.path.join(args.path_dir, "0-" + dtype + ".pth"))
 
     data_args = vars(args)
@@ -1391,12 +821,6 @@ def pretrain(args, encoders, datahandler):
                 for it, dtype in enumerate(args.contrastive):
                     pwint(f"{dtype} var:", torch.mean(torch.Tensor(saved_vars[it])))
 
-                # file_to_update.write(f"epoch {e}" + '\n')
-                # file_to_update.write(f"loss {torch.mean(torch.Tensor(saved_loss))}" + '\n')
-                #for it, dtype in enumerate(args.contrastive):
-                #    file_to_update.write(f"{dtype} var: {torch.mean(torch.Tensor(saved_vars[it]))} \n")
-                # file_to_update.flush()
-        
         for encoder in encoders:
             encoder.train()
 
@@ -1404,7 +828,6 @@ def pretrain(args, encoders, datahandler):
         for var in saved_vars:
             var = []
 
-        #train_loader = datahandler.site_loader('pretrain', args.bsz)
         train_tloader = datahandler.by_type(args.type_bsz, select_size=args.type_num, dataset='pretrain')
         for it, elem in tenumerate(chain(train_loader, train_tloader), total=len(train_loader) + args.type_num):
             for encoder in encoders:
@@ -1478,7 +901,7 @@ def main(args):
         pass
     log_file = args.path_dir + '/all.log'
 
-    os.environ["CUDA_VISIBLE_DEVICES"] = str(args.gpu) # TODO: add all GPUs to make parallelism work 
+    os.environ["CUDA_VISIBLE_DEVICES"] = str(args.gpu) 
     pwint("gpu", args.gpu)
     pwint(torch.cuda.device_count())
 
@@ -1532,7 +955,6 @@ def main(args):
         encoder = model.TCGAEncoders(data_types=args.contrastive, datahandler=datahandler, mode=args.mode, rep_dim=args.repr_dim)[0]
     else:
         if not new_weights: 
-            #datahandler = torch.load(os.path.join(args.path_dir, "dataset/datahandler.pt"))
             with open(os.path.join(args.path_dir, 'dataset/datahandler.pt'), 'rb') as f:
                 datahandler = pickle.load(f)
             
@@ -1543,7 +965,6 @@ def main(args):
             args.zero_shot = datahandler.zero_shot
             args.finetune = datahandler.finetune
 
-            #encoders = model.TCGAEncoders(data_types=args.contrastive, datahandler=datahandler, mode=args.mode, rep_dim=old_args["repr_dim"])
             encoders = model.TCGAEncoders(data_types=old_args["contrastive"], datahandler=datahandler, mode=args.mode, rep_dim=old_args["repr_dim"], rna_hidden=old_args["rna_hidden"], trns_arch=old_args["lm_arch"], clin_arch=old_args["clin_arch"], clin_hidden=old_args["clin_hidden"], cheads=old_args["cheads"], cdepth=old_args["cdepth"], cdropout=old_args["cdropout"], nocombine=old_args["nocombine"], inter_attn=old_args["inter_attn"], cdims=old_args["cdims"])
             for encoder, name in zip(encoders, args.contrastive): # TODO REMOVE THIS
                 try:
@@ -1664,7 +1085,6 @@ if __name__ == '__main__':
     parser.add_argument('--epochs', default=100, type=int)
     parser.add_argument('--ft_epochs', default=20, type=int)
     parser.add_argument('--ft_trials', default=20, type=int)
-    #parser.add_argument('--freeze_model', default=True, action='store_false')
 
     parser.add_argument('--bsz', default=512, type=int)
     parser.add_argument('--val_bsz', default=16, type=int)
@@ -1682,7 +1102,6 @@ if __name__ == '__main__':
     parser.add_argument('--c_lr', default=1e-4, type=float)
     parser.add_argument('--ft_lr', default="(2e-5,0.001)", type=str) # learning rate for fine tuning
     parser.add_argument('--wd', default=0.001, type=float) # TODO: add different weight decays for different architectures
-    #parser.add_argument('--p', default=0.9, type=float) # momentum for genetic mlp
     parser.add_argument('--euclidean', default=False, action='store_true')
     parser.add_argument('--twoway', default=False, action='store_true')
     parser.add_argument('--lr_weight', default='(1,1)', type=str)

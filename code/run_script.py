@@ -51,9 +51,6 @@ def clear(cmd):
         for line in lines:
             f.write(line + "\n")
 
-#all_clear = False
-#while not all_clear:
-#    all_clear = True
 with open("run_lines.txt", "r") as f:
     ls = f.read().split("\n")
     previous_run = None
@@ -71,4 +68,3 @@ with open("run_lines.txt", "r") as f:
             previous_run.join()
             p.join()
             previous_run = None
-#time.sleep(10)

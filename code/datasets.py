@@ -166,15 +166,6 @@ def TCGA_Indicator_Dataset(args=None):
 
         ret = list(df["new_neoplasm_event_type"].iloc[lines])
 
-        # def yn_map(x):
-        #     if isinstance(x, str) and "M0" in x:
-        #         return 0
-        #     elif isinstance(x, str) and "M1" in x:
-        #         return 1
-        #     else:
-        #         return -1
-
-        # ret = list(df["pathologic_M"].iloc[lines])
     elif args["prop"] == "barretts":
         # baretts esophagus
         # size 396
@@ -239,16 +230,6 @@ def TCGA_NLIndicator_Dataset(args=None):
         # size ~750
         # around 330/400 split
 
-        #def yn_map(inn):
-        #    x = inn[0]
-        #    type = inn[1]
-        #    if x == "YES":
-        #        return f"Diagnosis {type} evidence of lymphovascular invasion"
-        #    elif x == "NO":
-        #        #return f"A {type} with no evidence of lymphovascular invasion"
-        #        return f"A {type}"
-        #    else:
-        #        return "None"
         def pos(ctype):
             return f"Diagnosis {ctype} . Evidence of lymphovascular invasion"
 
@@ -260,16 +241,6 @@ def TCGA_NLIndicator_Dataset(args=None):
         # perineural invasion
         # size: 636
 
-        # def yn_map(inn):
-        #     x = inn[0]
-        #     type = inn[1]
-        #     if x == "YES":
-        #         #return f"A {type} with evidence of perineural invasion"
-        #         return f"A {type}"
-        #     elif x == "NO":
-        #         return f"A {type} with no evidence of perineural invasion"
-        #     else:
-        #         return "None"
         def pos(ctype):
             return f"Diagnosis {ctype} . Evidence of perineural invasion"
 
@@ -278,19 +249,6 @@ def TCGA_NLIndicator_Dataset(args=None):
 
         ret = list(df["perineural_invasion_present"].iloc[lines])
     elif args["prop"] == "papillary_nl":
-        # papillary/non papillary for BLCA
-        # size 407
-        # num positives: 133
-
-        # def yn_map(inn):
-        #     x = inn[0]
-        #     type = inn[1]
-        #     if x == 'Papillary':
-        #         return f"A {type} papillary"
-        #     elif x == 'Non-Papillary':
-        #         return f"A {type} not papillary"
-        #     else:
-        #         return "None"
         def pos(ctype):
             return f"Diagnosis papillary {ctype} ."
 
@@ -303,15 +261,6 @@ def TCGA_NLIndicator_Dataset(args=None):
         # size 525
         # pos: 274 vs 261
 
-        # def yn_map(inn):
-        #     x = inn[0]
-        #     type = inn[1]
-        #     if str(x) != "nan" and "Metastasi" in x:
-        #         return f"A {type} with evidence of metastasis"
-        #     elif str(x) != "nan":
-        #         return f"A {type} with no evidence of metastasis"
-        #     else:
-        #         return "None"
         def pos(ctype):
             return f"Diagnosis {ctype} . Evidence of distant metastasis"
 
@@ -319,7 +268,6 @@ def TCGA_NLIndicator_Dataset(args=None):
             return f"Diagnosis {ctype} ."
 
         ret = list(df["new_neoplasm_event_type"].iloc[lines])
-        #ret = list(df["pathologic_M"].iloc[lines])
     elif args["prop"] == "necrosis_nl":
         def pos(ctype):
             return f"Diagnosis {ctype} . Evidence of necrosis"
@@ -374,8 +322,6 @@ def TCGA_NLIndicator_Dataset(args=None):
             return True
         if "absent" in s.lower() or "present" in s.lower():
             return True
-        #if "metastasi" in s.lower():
-        #    return True
         if "m1" or "m0" in s.lower():
             return True
         if "no" in s.lower() or "yes" in s.lower():
@@ -384,8 +330,6 @@ def TCGA_NLIndicator_Dataset(args=None):
     
     types = TCGA_Type_Dataset(args=args)
     types = type_acronym_mapping([types[1][x] for x in types[0].long().tolist()])
-    # ret = list(map(yn_map, zip(ret, types)))
-    # ret = ["None"] + ret
     types = [x if okay_key(ret[it]) else None for it, x in enumerate(types)]
 
     positives = ["None" if t == None else pos(t) for t in types]
@@ -418,7 +362,6 @@ def TCGA_NLIndicator_Dataset(args=None):
             "neg_attention_mask": batch["attention_mask"][len(positives):]
     }
     
-    #return batch
     return ret
 
 def TCGA_Clinical_Dataset(args=None):
@@ -431,7 +374,6 @@ def TCGA_Clinical_Dataset(args=None):
     except:
         with open("../tcga/clinical/processed_ids.txt", "r") as f:
             orig_ids = json.load(f)
-        # column names cna be accessed by processed_cols
 
         data = np.load("../tcga/clinical/processed_clinical_data.npy")
         data = np.transpose(data)
@@ -451,14 +393,7 @@ def TCGA_Clinical_Dataset(args=None):
             else:
                 return "categorical"
 
-        #remove clinical indicator columns
-        #prop_columns = ["lymphovascular_invasion_present", "perineural_invasion_present", "diagnosis_subtype", "new_neoplasm_event_type", "barretts_esophagus"]
-        #bad_idx = [dtypes.index(col) for col in prop_columns]
-        #good_idx = [idx for idx in range(len(dtypes)) if idx not in bad_idx]
-        #data = data[good_idx]
         dtypes = list(map(dtype_map, dtypes))
-        #dtypes = dtypes[good_idx]
-        #assert(np.size(data, axis=0) > np.size(data, axis=1))
 
         categorical_idx = [it for it, x in enumerate(dtypes) if x == "categorical"]
         continuous_idx = [it for it, x in enumerate(dtypes) if x == "continuous"]
@@ -471,7 +406,6 @@ def TCGA_Clinical_Dataset(args=None):
                 num_classes = int(torch.max(categorical[:, r]).item() + 1)
                 bad_vals = torch.where(torch.bincount(categorical[:, r].long()) < args["reduce_columns"])[0]
                 is_bad = torch.Tensor(list(map(lambda x: x in bad_vals, categorical[:, r]))).cuda().bool()
-                #is_bad = torch.Tensor(list(map(lambda x: x in bad_vals, categorical[:, r]))).bool()
                 categorical[is_bad, r] = num_classes
                 
                 remain_vals = [i for i in range(num_classes + 1) if i not in bad_vals]
@@ -516,7 +450,7 @@ def TCGA_Clinical_Dataset(args=None):
     else:
         return torch.cat((categorical, continuous), dim=1)
 
-def TCGA_RNA_Dataset(args=None): # TODO: option to generate new data (reports as well!)
+def TCGA_RNA_Dataset(args=None): 
     inn = []
 
     try:
@@ -561,9 +495,7 @@ def TCGA_RNA_Dataset(args=None): # TODO: option to generate new data (reports as
                 end = int(inn.size(1) / bnum * (i + 1))
                 high_percentile[begin:end] = torch.quantile(inn[:, begin:end], 0.95, dim=0, keepdim=True)
 
-            # normalize
             inn = torch.minimum(inn, high_percentile)
-            #inn = torch.log(1 + inn)
             inn = inn - torch.mean(inn, dim=0, keepdim=True)
             inn = inn / torch.std(inn, dim=0, keepdim=True)
         else:
@@ -585,19 +517,6 @@ def TCGA_RNA_Dataset(args=None): # TODO: option to generate new data (reports as
 
 def TCGA_ToyReports_Dataset(args=None):
     return None
-
-    # types, desc = TCGA_Type_Dataset(args=args)
-    # types = types.tolist()
-    # types = [desc[int(elem)] for elem in types]
-    # types = type_acronym_mapping(types)
-
-    # tokenizer = transformers.AutoTokenizer.from_pretrained('distilbert-base-uncased')
-    # batch = tokenizer(types, padding=True, truncation=True, return_tensors="pt")
-
-    # if torch.cuda.is_available():
-    #     batch.to('cuda:0')
-
-    # return batch
 
 def TCGA_Reports_Dataset(args=None, input_txt=None):
     if args["manual"]:
@@ -626,11 +545,6 @@ def TCGA_Reports_Dataset(args=None, input_txt=None):
         else:
             inn = [input_txt]
 
-        # TODO: ADD MEASUREMENTS & FLOATS SUPPORT
-        #text = text.split(" ")
-        #def is_measurement(word):
-        #    return ((text[-2:] == "cm" or text[-2:] == "mm") and isfloat(text[:-2])) or ((text[-3:-1] == "cm" or text[-3:-1] == "mm") and isfloat(text[-3:-1]))
-        #text = [word for word in text if not is_measurement(word)]
         if args["lm_arch"] == "distilbert":
             tokenizer = transformers.AutoTokenizer.from_pretrained('distilbert-base-uncased')
         elif args["lm_arch"] == "biobert":
@@ -647,11 +561,10 @@ def TCGA_Reports_Dataset(args=None, input_txt=None):
     if torch.cuda.is_available():
         batch.to('cuda:0')
 
-    # return batch
     return batch
 
 def site_shuffle(l, rand=None, num_split=-1):
-    def site_generator(z): # splits each site into 5 parts
+    def site_generator(z): 
         if num_split != -1:
             int_alpha = [str(x) for x in range(10)] + [str(x) for x in string.ascii_uppercase]
             return str(z[5] + z[6] + str(int_alpha.index(z[11]) % num_split))
@@ -723,14 +636,6 @@ class TCGADataHandler():
         c_pretrain_idx = c_tt_idx[:floor(len(c_tt_idx) * train_ratio)] 
         c_test_idx = c_tt_idx[floor(len(c_tt_idx) * train_ratio):] 
 
-        # if len(z_train_idx) > 0:
-        #     random.shuffle(z_train_idx)
-        #     f_tt_idx = c_test_idx + z_train_idx[0][floor(len(z_train_idx) * train_ratio):]
-        # else:
-        #     f_tt_idx = c_test_idx
-        # random.shuffle(f_tt_idx)
-        # f_train_idx = f_tt_idx[:floor(len(f_tt_idx) * ft_train_ratio)]
-        # f_test_idx = f_tt_idx[floor(len(f_tt_idx) * ft_train_ratio):]
         f_train_idx = c_pretrain_idx + sorted(list(set([id for ztidx in z_train_idx for id in ztidx])))
         f_test_idx = c_test_idx + sorted(list(set([id for ztidx in z_test_idx for id in ztidx])))
 
@@ -741,14 +646,8 @@ class TCGADataHandler():
                 return False
             elif not isinstance(obj, dict):
                 return True
-            #elif "input_ids" not in obj.keys():
-            #    return True 
-            #elif torch.unique(obj["input_ids"]).tolist() == [-1]:
-            #    return False
             return True
 
-        #z_train_idx = [[x for x in z_train_idx[it] if is_not_n1(dataset[x][obj])] for it, obj in enumerate(zero_shot)]
-        #z_test_idx = [[x for x in z_test_idx[it] if is_not_n1(dataset[x][obj])] for it, obj in enumerate(zero_shot)]
         if len(zero_shot) > 0:
             raise NotImplementedError("no zero shot takss please")
         train_ok = dataset[f_train_idx]
@@ -762,7 +661,6 @@ class TCGADataHandler():
 
         f_train_idx = [[x for iit, x in enumerate(f_train_idx) if train_ok[oit][iit]] for oit, obj in enumerate(finetune)]
         f_test_idx = [[x for iit, x in enumerate(f_test_idx) if test_ok[oit][iit]] for oit, obj in enumerate(finetune)]
-        #f_test_idx = [[x for x in f_test_idx if is_not_n1(dataset[x][obj])] for obj in finetune]
 
         self._c_pretrain_idx = [self._dataset.tcga_ids.index(id) for id in c_pretrain_idx]
         self._c_test_idx = [self._dataset.tcga_ids.index(id) for id in c_test_idx]
@@ -798,25 +696,6 @@ class TCGADataHandler():
         for k in list(self.nl_prompts.keys()):
             self.nl_prompts[k] = self.tokenizer(self.nl_prompts[k], padding=True, truncation=True, return_tensors="pt")
             self.nl_prompts[k].to('cuda:0')
-
-
-    # def nl_prompts(self, task):
-    #     ret = None
-
-    #     if task == "lv_nl":
-    #         ret = ["lymphovascular invasion absent", "lymphovascular invasion present"]
-    #     elif task == "perineural_nl":
-    #         ret = ["perineural invasion absent", "perineural invasion present"]
-    #     elif task == "papillary_nl":
-    #         ret = ["papillary type", "non papillary type"]
-    #     elif task == "metastasis_nl":
-    #         ret = ["evidence of metastasis", "no metastasis"]
-    #     elif task == "barretts_nl":
-    #         ret = ["no barrett esophagus", "barett esophagus"]
-
-    #     tokenizer = transformers.AutoTokenizer.from_pretrained('distilbert-base-uncased')
-    #     batch = tokenizer(ret, padding=True, truncation=True, return_tensors="pt")
-    #     return batch
 
     def site_loader(self, dataset, batch_size, drop_last=True):
         if dataset == "pretrain":
@@ -933,10 +812,8 @@ class TCGADataHandler():
         size = size.size()[0]
 
         perm_idx = torch.randperm(size)
-        #lam = torch.unsqueeze(torch.Tensor(np.random.beta(0.2, 0.2, size=size)), dim=1)
         lam = torch.unsqueeze(torch.Tensor(np.random.exponential(scale=scale, size=size)), dim=1)
         lam = torch.minimum(lam, torch.full(lam.size(), 1.0)).cuda()
-        #for m in mods:
         for m in ['rna-seq']:
             if isinstance(dataset[m], dict):
                 if list(sorted(dataset[m].keys())) == sorted(["input_ids", "attention_mask"]):
@@ -959,19 +836,12 @@ class SiteSampler(torch.utils.data.sampler.Sampler):
         self.num_matches = num_matches
 
     def __iter__(self):
-        #print(self.ids[:50], 'self ids pre shuffle')
         shuffle_ids = site_shuffle(self.ids, random.Random())
-        #print(self.ids[:50], 'self ids pre shuffle')
         ret = [self.ids.index(x) for x in shuffle_ids]
-        #print(ret[:50], "ret after generation")
         ret = ret[:self.num_matches * floor(len(ret) / self.num_matches)]
-        #print(ret[:50], "ret after indexing")
         ret = np.reshape(np.array(ret), (-1, self.num_matches))
-        #print(ret[:50], "ret after np") 
         np.random.shuffle(ret)
-        #print(ret[:50], "ret after shuffling")
         ret = list(np.reshape(ret, (-1, )))
-        #print(ret[:50], "ret after listing")
         return iter(ret)
 
     def __len__(self):
@@ -979,7 +849,7 @@ class SiteSampler(torch.utils.data.sampler.Sampler):
 
 # A universal TCGA dataset generator.
 class TCGADataset(torch.utils.data.Dataset):
-    def __init__(self, data_src, save=True, copy_ds=None, rna_thresh=0.5, clin_thresh=50, rna_set='', lm_arch='distilbert', clin_one_hot=False): # implement these new parameters!! & 3 outputs not one
+    def __init__(self, data_src, save=True, copy_ds=None, rna_thresh=0.5, clin_thresh=50, rna_set='', lm_arch='distilbert', clin_one_hot=False): 
         self.data_src = data_src
 
         with open("../tcga/data_availability.json", "r") as f:
@@ -993,7 +863,7 @@ class TCGADataset(torch.utils.data.Dataset):
         self.tcga_ids = good_ids
 
         def dataset_map(name):
-            if name == "rna-seq": # TODO: add cna,mutations,clinical
+            if name == "rna-seq": 
                 if copy_ds == None:
                     return TCGA_RNA_Dataset(args={"ids": good_ids, "copy_ds": None, "thresh": rna_thresh, "save": save, "rna_set": rna_set})
                 else:
@@ -1023,82 +893,7 @@ class TCGADataset(torch.utils.data.Dataset):
         if "type" not in data_src:
             self.data["type"] = dataset_map("type")
 
-    """def __init__(self, contrastive=['rna-seq', 'reports'], zero_shot=[], split=[verbose_=True):
-        global verbose
-        verbose = verbose_
-
-        self.lr_data_types = deepcopy(lr_data)
-        self.target_type = target
-
-        # First, find the IDs that have all data types.
-        with open("../tcga/data_availability.json", "r") as f:
-            avail = json.load(f)
-        if target == "":
-            data_src = lr_data
-        else:
-            data_src = lr_data + [target]
-        good_ids = avail[data_src[0]]
-        for it in range(1, len(data_src)):
-            good_ids = [id for id in good_ids if id in avail[data_src[it]]]
-        self.tcga_ids = good_ids
-
-        # Now, map dataset names to IDs.
-        def dataset_map(name): # TODO include subtype data as well & empty
-            if name == "rna-seq": # TODO: add cna,mutations,clinical
-                return TCGA_RNA_Dataset(args={"ids": good_ids, "thresh": 0.5})
-            elif name == "clinical":
-                return TCGA_Clinical_Dataset(good_ids) #TODO: implement
-            elif name == "reports" or name == "clean-reports":
-                return TCGA_Reports_Dataset(args={"ids": good_ids})
-            elif name == "toy_reports":
-                return TCGA_ToyReports_Dataset(args={"ids": good_ids})
-            elif name == "type":
-                d = TCGA_Type_Dataset(args={"ids": good_ids})
-                return d[0]
-            elif name == "coad_subtype":
-                return TCGA_Subtypes_Dataset(type='coad') # TOOD: implement
-            else:
-                raise RuntimeError("given data list for TCGA dataset generation is unrecognized")
-
-        for it, data_type in enumerate(data_src):
-            data_src[it] = dataset_map(data_type)
-
-        self.lr = data_src[:len(lr_data)]
-        if target != "":
-            self.target = data_src[-1]
-        else:
-            self.target = None
-        input(len(self))"""
-
     def __getitem__(self, idx):
-        # def safe_index(data, idx, data_type):
-        #     if data_type == "rna-seq":
-        #         return data[idx]
-        #     elif data_type == "type":
-        #         return data[idx]
-        #     elif data_type == "clinical":
-        #         small_ret = {}
-        #         for key in data.keys():
-        #             small_ret[key] = data[key][idx]
-        #         return small_ret
-        #     elif data_type == "reports" or data_type == "clean-reports":
-        #         small_ret = {}
-        #         for key in data.keys():
-        #             small_ret[key] = data[key][idx]
-        #         return small_ret
-        #     elif data_type == "toy_reports":
-        #         small_ret = {}
-        #         for key in data.keys():
-        #             small_ret[key] = data[key][idx]
-        #         return small_ret
-
-        # ret = {}
-        # ret["left"] = safe_index(self.lr[0], idx, self.lr_data_types[0])
-        # if len(self.lr) > 1:
-        #     ret["right"] = safe_index(self.lr[1], idx, self.lr_data_types[1])
-        # if self.target != None:
-        #     ret["target"] = safe_index(self.target, idx, self.target_type)
-
         if isinstance(idx, str) and idx[:4] == "TCGA":
             return self[self.tcga_ids.index(idx)]
         elif isinstance(idx, list) and all(isinstance(l, str) for l in idx) and all(l[:4] == "TCGA" for l in idx):
@@ -1126,14 +921,4 @@ class TCGADataset(torch.utils.data.Dataset):
         return ret
 
     def __len__(self):
-        # if self.lr_data_types[0] == "rna-seq":
-        #     return np.size(self.lr[0], axis=0)
-        # elif self.lr_data_types[0] == "type":
-        #     return np.size(self.lr[0], axis=0)
-        # elif self.lr_data_types[0] in ["reports", "clean-reports"]:
-        #     return np.size(self.lr[0]["input_ids"], axis=0)
-        # elif self.lr_data_types[0] == "toy_reports":
-        #     return np.size(self.lr[0]["input_ids"], axis=0)
-        # elif self.lr_data_typse[0] == "clinical":
-        #     return np.size(self.lr[0]["data"], axis=0)
         return len(self.tcga_ids)

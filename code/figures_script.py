@@ -112,27 +112,11 @@ def tokenize(s, lm_arch):
 
     return batch
 
-# prompts = {
-#         "metastasis": ["diagnosis carcinoma", "diagnosis carcinoma lymph node positive for metastatic tumor"],
-#         "papillary": ["diagnosis invasive urothelial carcinoma", "diagnosis papillary urothelial carcinoma"],
-#         "perineural": ["diagnosis carcinoma perineural invasion absent", "diagnosis carcinoma perineural invasion present"],
-#         "ulceration": ["diagnosis melanoma", "diagnosis melanoma features consistent with ulceration"],
-#         "lv":  ["diagnosis carcinoma lymphovascular invasion absent", "diagnosis carcinoma"]
-# }
-# prompts = {
-#         "metastasis": ["diagnosis carcinoma", "diagnosis carcinoma there is evidence of widespread distant metastasis"],
-#         "papillary": ["diagnosis carcinoma of flat subtype", "diagnosis carcinoma of papillary subtype"],
-#         "perineural": ["diagnosis carcinoma", "diagnosis carcinoma there is evidence of perineural invasion"],
-#         "ulceration": ["diagnosis melanoma", "diagnosis melanoma there appears to be signs of ulceration"],
-#         "lv":  ["diagnosis carcinoma", "diagnosis carcinoma there is evidence of lymphovascular inavsion"]
-# }
-
 def spherical(xyz):
     ptsnew = np.hstack((xyz, np.zeros(xyz.shape)))
     xy = xyz[:,0]**2 + xyz[:,1]**2
     ptsnew[:,3] = np.sqrt(xy + xyz[:,2]**2)
     ptsnew[:,4] = np.arctan2(np.sqrt(xy), xyz[:,2]) # for elevation angle defined from Z-axis down
-    #ptsnew[:,4] = np.arctan2(xyz[:,2], np.sqrt(xy)) # for elevation angle defined from XY-plane up
     ptsnew[:,5] = np.arctan2(xyz[:,1], xyz[:,0])
     return ptsnew[:, 3:]
 
@@ -164,15 +148,6 @@ def raw_clip_acc():
             np.array([np.nansum(np.diagonal(model["type_confusion_matrix"])) / model["args"]["bsz"] for model in base_models]),
             np.full((len(base_models), ), 1 / base_models[0]["args"]["bsz"])
         ]
-
-    # y = pd.DataFrame({
-    #         "name": ["ConRED", "Random Type-Based", "Random"],
-    #         "accs": [
-    #                 np.mean(np.array([model["final_acc"] for model in base_models])),
-    #                 np.array([np.nansum(np.diagonal(model["type_confusion_matrix"])) / model["args"]["bsz"] for model in base_models])),
-    #                 1 / model["args"]["bsz"]
-    #             ],
-    # })
 
     print(y, "base accuracies: figure 2")
     plt.bar([0, 1, 2], [np.mean(k) for k in y], tick_label=x, color=[gold(0.5), gold(0.25), gold(0.25)])
@@ -235,8 +210,6 @@ def inner_match():
     print(y, "innertype accs: figure 4")
 
     print('mention that u did gmean not mean')
-    #barcolors = [list(twoway(0)) if gmean(k) < 1 else list(twoway(1)) for k in y]
-    #print(barcolors)
     num_bad = len([k for k in y if gmean(k) < 1])
     plt.bar(list(range(len(x))), [gmean(k) for k in y], tick_label=x, color=[cats[4]] * (len(x) - num_bad) + [cats[7]] * num_bad)
     plt.errorbar(x, [gmean(k) for k in y], yerr=np.array([cinterval(k) for k in y]), fmt='o', color='k')
@@ -274,7 +247,6 @@ def acc_corr():
     plt.show()
 
 def predictions(model):
-    #modelprint(model["rna-seq"][:10, :30], "form pred")
     tasks = []
     for t in model["args"]["finetune"]:
         if t[-3:] == "_nl":
@@ -283,47 +255,30 @@ def predictions(model):
     tasks = sorted(list(set(tasks)))
 
     def normalize(arr):
-        #print(arr[:10, :10], "form normalie")
         sizes = np.sum(np.square(arr), axis=1, keepdims=True)
-        #print(sizes[:50])
-        #print(sizes.shape)
         return arr / np.sqrt(sizes)
 
 
-    #print(model["rna-seq"].shape)
     if my_prompts:
         embed = normalize(model['rna-seq'])
     else:
         embed = np.expand_dims(normalize(model['rna-seq']), 1)
-    #print(embed[0, :30, :10], "embed")
     for task in tasks:
         good_idx = np.where(model[task] != -1)[0]
-        #print(good_idx)
-        #print(good_idx.shape)
         if not my_prompts:
             pembed = np.linalg.norm(model[task + "_pembed"], axis=1)
             nembed = np.linalg.norm(model[task + "_nembed"], axis=1)
             pembed = normalize(model[task + "_pembed"][good_idx, :])
             nembed = normalize(model[task + "_nembed"][good_idx, :])
 
-        #print(prompts[task])
         if my_prompts:
             task_embed = normalize(model["nl"](tokenize(prompts[task], model["args"]["lm_arch"])).detach().numpy())
-        #print(task_embed)
-        #print(task_embed.shape)
-        #print(task_embed[:30, :10])
 
         if not my_prompts:
             dist = np.matmul(embed[good_idx, :], np.stack((nembed, pembed), axis=2))
             dist = np.squeeze(dist, axis=1)
         else:
             dist = embed[good_idx, :] @ task_embed.T
-        #print(embed[good_idx, :].shape, "embed shape")
-        #print(dist.shape)
-
-        #print(model[task].shape)
-        #print(model[task])
-        #print(task)
         model[task + "_pred"] = np.full(model[task].shape, -1.0)
         model[task + "_pred"][good_idx] = 1/(1 + np.exp((dist[:, 1] - dist[:, 0]) / model["args"]["temp"]))
         print(task, model[task + "_pred"][:1000])
@@ -331,10 +286,6 @@ def predictions(model):
     return model
 
 def ensemble(models):
-    #for model in models:
-    #    model = predictions(model)
-
-    tasks = []
     for model in models:
         for t in model["args"]["finetune"]:
             if t[-3:] == "_nl":
@@ -344,65 +295,32 @@ def ensemble(models):
     print(tasks, "Tasks")
 
     for task in tasks:
-        #train_targets = models[0][task][model["test_indicator"] == 0]
         test_targets = models[0][task][model["test_indicator"] == 1]
 
-        #train_preds = []
         test_preds = []
         for model in models:
-            #train_preds.append(model[task + "_pred"][model["test_indicator"] == 0])
             test_preds.append(model[task + "_pred"][model["test_indicator"] == 1])
         
-        #train_preds = np.array(train_preds)
         test_preds = np.array(test_preds)
         print(test_targets[:500].tolist())
         print(test_preds.shape, "preds 1")
         print(test_targets.shape, "targets 1")
 
-        #train_good_idx = np.where(models[0][task][model["test_indicator"] == 0] != -1)[0]
-        #test_good_idx = np.where(models[0][task][model["test_indicator"] == 1] != -1)[0]
-        #train_good_idx = np.where(train_targets != -1)[0]
         test_good_idx = np.where(test_targets != -1)[0]
 
-        #train_targets = train_targets[train_good_idx]
-        #train_preds = train_preds[:, train_good_idx]
         test_targets = test_targets[test_good_idx]
         test_preds = test_preds[:, test_good_idx]
 
         print(test_preds.shape, "preds 2")
         print(test_targets.shape, "targets 2")
-        #print(train_targets.shape, 'train target shape')
-        #print(train_preds.shape, 'train pred shape')
-        #print(test_targets.shape, 'test target shape')
-        #print(test_preds.shape, 'test pred shape')
 
-        #print(test_preds.tolist())
-
-        #train_good_idx = ~np.any(np.isnan(train_preds), axis=0)
         test_good_idx = ~np.any(np.isnan(test_preds), axis=0)
 
-        #train_targets = train_targets[train_good_idx]
-        #train_preds = train_preds[:, train_good_idx]
         test_targets = test_targets[test_good_idx]
         test_preds = test_preds[:, test_good_idx]
 
         print(test_preds.shape, "preds 3")
         print(test_targets.shape, "targets 3")
-        #print(train_targets.shape, 'train target shape')
-        #print(train_preds.shape, 'train pred shape')
-        #print(test_targets.shape, 'test target shape')
-        #print(test_preds.shape, 'test pred shape')
-
-        # train plot
-        # train_cs = []
-        # train_cs.append(RocCurveDisplay.from_predictions(train_targets, np.quantile(train_preds, 0.5, axis=0)))
-        # for i in range(len(models)):
-        #     train_cs.append(RocCurveDisplay.from_predictions(train_targets, train_preds[i, :]))
-        # for it, c in enumerate(train_cs[1:]):
-        #     c.plot(name=str(it), ax=train_cs[0].ax_, color=cats[it])
-
-        # plt.title(f"train {task}")
-        # plt.show() 
 
         # test plot
         test_cs = []
@@ -433,21 +351,6 @@ def twod_surv_plot():
     leng = np.minimum(np.full(leng.shape, 1.0), leng)
     print(leng[:50], "leng")
     
-    # if not plot_3d:
-    #     pts = spherical(pts)
-
-    #     plt.scatter(pts[:, 1], pts[:, 2], c=types)
-    #     plt.xlabel("theta")
-    #     plt.ylabel("phi")
-
-    #     plt.show()
-    # else:
-    #     fig = plt.figure()
-    #     ax = fig.add_subplot(projection='3d')
-
-    #     ax.scatter(pts[:, 0], pts[:, 1], pts[:, 2], c=types)
-
-    #long_cats = cats * 16
     print(max(types))
     plt.scatter(qts[:, 0], qts[:, 1], c=leng, marker="^", cmap=flare)
     plt.scatter(pts[:, 0], pts[:, 1], c=leng, cmap=flare)
@@ -464,7 +367,6 @@ def site():
 
     plt.bar([0, 1], [np.mean(sites), np.mean(nosites)], tick_label=["Normal", "With Site Effects"], color=[cats[0], cats[2]])  
     print([np.mean(sites), np.mean(nosites)], "mean acc w/o sites")
-    #plt.errorbar([0, 1], [np.mean(sites), np.mean(nosites)], yerr=[cinterval(sites), cinterval(nosites)], fmt='o', color='k')
     plt.ylabel("Top-1 retrieval accuracy")
     plt.show()
 
@@ -513,7 +415,6 @@ def data_size():
     y = x * lr.slope + lr.intercept
     a, b = logFit(np.array(uvals), np.array([np.mean(k) for k in uaccs]))
     yy = a + b * np.log(x) 
-    #plt.plot(x, y, c='k', ls='--', alpha=0.5)
     plt.plot(uvals, [np.mean(k) for k in uaccs], c=cats[1], lw=3)
     plt.plot(x, yy, c='k', ls='--', alpha=0.75)
     plt.gca().set_xlim(left=900, right=50000)
@@ -537,7 +438,6 @@ def dim_size():
             vals.append(2)
         else:
             raise ValueError('var doesnt work')
-    #vals = [x * np.size(base_models[0]["rna-seq"], axis=0) for x in vals]
 
     uvals = sorted(list(set(vals)))
     uaccs = []
@@ -551,7 +451,6 @@ def dim_size():
     y = x * lr.slope + lr.intercept
     a, b = logFit(np.array(uvals), np.array([np.mean(k) for k in uaccs]))
     yy = a + b * np.log(x) 
-    #plt.plot(x, y, c='k', ls='--', alpha=0.5)
     plt.plot(uvals, [np.mean(k) for k in uaccs], c=cats[4], lw=3)
     plt.plot(x, yy, c='k', ls='--', alpha=0.75)
     plt.gca().set_xlim(left=1,right=1024)
@@ -561,13 +460,9 @@ def dim_size():
 
     plt.show()
 def surv_analysis():
-    #model = small_models[0]
     model = base_models[0]
     mask, length = get_surv([id for it, id in enumerate(model["ids"])])
     
-    #for u in range(32):
-    #train_idx = np.logical_and(model["test_indicator"] == 0, get_type(model["ids"]) == u)
-    #test_idx = np.logical_and(model["test_indicator"] == 1, get_type(model["ids"]) == u)
     train_idx = model["test_indicator"] == 0
     test_idx = model["test_indicator"] == 1
     train_df = pd.DataFrame({
@@ -593,32 +488,12 @@ def surv_analysis():
     cph = CoxPHFitter()
     cph.fit(train_df, 'length', 'mask')
 
-    #print(base_models[0]["types"][i])
     print(cph.score(test_df, scoring_method='concordance_index'))
-    #cph.print_summary()
     pass
-
-# def auc():
-#     tasks = []
-#     for model in base_models:
-#         for t in model["args"]["finetune"]:
-#             if t[-3:] == "_nl":
-#                 tasks.append(t)
-# 
-#     tasks = sorted(list(set(tasks)))
-# 
-# 
-#     for t in tasks:
-#         for model in base_models:
 
 
 def main(fargs):
-    #for exp_name, model_list in zip([small_exp_name], [small_models]):
-    #for exp_name, model_list in zip([base_exp_name], [base_models]):
-    #for exp_name, model_list in zip([twod_exp_name], [twod_models]):
-    #for exp_name, model_list in zip([twod_exp_name, base_exp_name], [twod_models, base_models]):
-    #for exp_name, model_list in zip([base_exp_name, twod_exp_name, small_exp_name, site_exp_name, data_exp_name], [base_models, twod_models, small_models, site_models, data_models]):
-    for exp_name, model_list in zip([try_exp_name], [try_models]):
+    for exp_name, model_list in zip([base_exp_name, twod_exp_name, small_exp_name, site_exp_name, data_exp_name], [base_models, twod_models, small_models, site_models, data_models]):
         for file in glob.glob("../../save/" + exp_name + "*/outputs.csv"):
             if file.endswith("0/outputs.csv"):
                 continue
@@ -638,11 +513,9 @@ def main(fargs):
             if site_exp_name == "nosite":
                 print(file[:file.rfind("/")].count("_"), "number of underscores")
             if file[:file.rfind("/")].count("_") == 2:
-                #ext = file[file.rfind("/") + 1:file.rfind(".")]
                 ext = file[:file.rfind("/")]
                 ext = ext[ext.rfind("/") + 1:]
                 ext = ext[ext.find("_") + 1:ext.rfind("_")]
-                #model["var"] = int(ext)
                 model["var"] = ext
                 print(model["var"], "var")
             nl_file = file[:file.rfind("/")] + f"/{epoch}-reports.pth"
@@ -666,8 +539,6 @@ def main(fargs):
                 if t[-3:] == "_nl":
                     model[t[:-3]] = df[t[:-3]].to_numpy()
 
-                    #model[t[:-3] + "_pembed"] = df[[t + "-pos-" + str(i) for i in range(args["repr_dim"])]].to_numpy()
-                    #model[t[:-3] + "_nembed"] = df[[t + "-neg-" + str(i) for i in range(args["repr_dim"])]].to_numpy()
                     tdf = pd.read_csv(file[:file.rfind("/") + 1] + f"{epoch}-" + t + ".csv")
                     tidx = [None if id not in tdf[t + "-ids"].tolist() else tdf[t + "-ids"].tolist().index(id) for id in model["ids"]]
                     model[t[:-3] + "_pred"] = np.array([-1 if kk == None else tdf[t + "-pred"].iloc[kk] for kk in tidx])
@@ -675,7 +546,6 @@ def main(fargs):
             for c in args["contrastive"]:
                 model[c] = df[[c + "-" + str(i) for i in range(args["repr_dim"])]].to_numpy()
 
-            # type acc; type size; 
             if "2d" not in exp_name:
                 with open(file[:file.rfind("/")] + "/all.log", "r") as f:
                     x = f.read()
@@ -685,12 +555,10 @@ def main(fargs):
                     if args["lg_types"]:
                         raise NotImplementedError("lg types")
                     
-                    #shift_num = 106 if not args["lg_types"] else -1
                     shift_num = [it for it, t in enumerate(x[idx:]) if t.startswith("Val loss")]
                     shift_num = shift_num[2] - 1
                     final_acc = float(x[idx + shift_num].split(" ")[-1])
 
-                    #shift_num = 122 if not args["lg_types"] else -1
                     shift_num = [it for it, t in enumerate(x[idx:]) if t == "Confusion Matrix:"]
                     shift_num = shift_num[2] + 2
                     num_type = 32 if not args["lg_types"] else -1
@@ -703,7 +571,6 @@ def main(fargs):
                     cm = list(map(lambda z: list(map(float, z)), cm))
                     cm = np.array(cm)
 
-                    #shift_num = 158 if not args["lg_types"] else -1
                     shift_num = [it for it, t in enumerate(x[idx:]) if t.startswith("Indices")]
                     shift_num = shift_num[0] + 3
                     class_accs = x[idx + shift_num - 1]

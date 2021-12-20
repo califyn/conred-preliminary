@@ -24,7 +24,6 @@ import pandas as pd
 import json 
 import scipy.stats
 import os
-#from sklearn.metrics import roc_curve, auc
 from sklearn.metrics import RocCurveDisplay
 
 custom_params = {"axes.spines.right": False, "axes.spines.top": False}

@@ -108,7 +108,6 @@ class Branch(nn.Module):
                 self.encoder = torchvision.models.resnet50(pretrained=False)
             elif size == 101:
                 self.encoder = torchvision.models.resnet101(pretrained=False)
-        # TODO NLP option
 
         if proj_out == -1:
             self.projector = nn.Identity()
@@ -188,7 +187,6 @@ def TCGAEncoders(data_types=['rna-seq'], datahandler=None, mode="validate", rep_
             if dtype == "rna-seq":
                 input_dim = dset.size()[1]
                 return Genetic_MLP(input_dim, rep_dim, size=rna_hidden)
-                #return Genetic_TabTransformer(input_dim, rep_dim)
             elif dtype in ["reports", "clean-reports"]:
                 return Pathological_Transformer(out_dim=rep_dim, trns_arch=trns_arch)
             elif dtype == "toy_reports":

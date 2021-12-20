@@ -52,4 +52,3 @@ with open("final_lines.txt", "r") as f:
         p = multiprocessing.Process(target=run_line, args=(line,))
         p.start()
         p.join()
-#time.sleep(10)
