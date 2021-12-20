@@ -1,0 +1,6 @@
+python train.py --mode=validate --left=rna-seq --path_dir=first_try --target=type --verbose --progress_every=1 --lr=0.1 --bsz=128
+python train.py --mode=validate --left=reports --path_dir=first_try --target=type --verbose --progress_every=1 --lr=0.1 --bsz=24
+python train.py --mode=pretraining --left=rna-seq --right=reports --path_dir=first_try --new_weights --verbose --progress_every=1 --bsz=24
+python train.py --mode=pretraining --left=rna-seq --right=reports --path_dir=first_try --new_weights --verbose --progress_every=1 --bsz=144 --val_every=5 --epochs=1000
+python train.py --mode=pretraining --left=rna-seq --right=reports --path_dir=first_try --new_weights --verbose --progress_every=1 --bsz=324 --val_every=1 --epochs=1000 --target=type --split=0.7,0,0.3
+python train.py --mode=pretraining --path_dir=first_try --new_weights --progress_every=1 --val_every=1 @args.txt

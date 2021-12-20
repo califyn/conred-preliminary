@@ -1,0 +1,35 @@
+lars optimizer for large batch size instead of sgd
+
+parallelism for larger batch size (clip bsz 32768)
+
+torch.nn.dataparallel
+
+79% if based off type
+
+contrastive pretraining for the genetic model
+
+type pretraining for the genetic model
+
+genetic model => transformer?
+
+losses other than simclr loss
+
+see exactly which error
+
+take features from the clinical data as downstream tasks
+
+create a downstream task
+
+mayybe "Lymphovascular_invasion_present" from the clinical data
+
+make evaluation scripts that can take in a model and then report it on the tabular data
+
+take in a save model
+add a linear layer/2 layers + freeze the original model
+see if you can extract type patterns etc
+
+evaluating using finetuning?
+you could also get the 2x10,000 representations and then directly evluate based off of that
+instead of loading model
+
+use adam instead of sgd

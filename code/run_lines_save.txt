@@ -1,0 +1,259 @@
+# python train.py --mode=pretraining --path_dir=baseline_1 --progress_every=1 --val_every=1 --eval_every=5 @sota_args.txt
+# python train.py --mode=pretraining --path_dir=baseline_2 --progress_every=1 --val_every=1 --eval_every=5 @sota_args.txt
+# python train.py --mode=pretraining --path_dir=baseline_3 --progress_every=1 --val_every=1 --eval_every=5 @sota_args.txt
+# python train.py --mode=pretraining --path_dir=baseline_4 --progress_every=1 --val_every=1 --eval_every=5 @sota_args.txt
+# python train.py --mode=pretraining --path_dir=baseline_5 --progress_every=1 --val_every=1 --eval_every=5 @sota_args.txt
+
+# python train.py --mode=pretraining --path_dir=hidden_0_1 --progress_every=1 --val_every=1 --eval_every=5 @sota_args.txt --rna_hidden=[]
+# python train.py --mode=pretraining --path_dir=hidden_2_1 --progress_every=1 --val_every=1 --eval_every=5 @sota_args.txt --rna_hidden=1280,512
+# python train.py --mode=pretraining --path_dir=hidden_4_1 --progress_every=1 --val_every=1 --eval_every=5 @sota_args.txt --rna_hidden=1280,512,512,512
+# python train.py --mode=pretraining --path_dir=hidden_6_1 --progress_every=1 --val_every=1 --eval_every=5 @sota_args.txt --rna_hidden=1280,512,512,512,256,256 --new_weights
+# python train.py --mode=pretraining --path_dir=hidden_0_2 --progress_every=1 --val_every=1 --eval_every=5 @sota_args.txt --rna_hidden=[]
+# python train.py --mode=pretraining --path_dir=hidden_2_2 --progress_every=1 --val_every=1 --eval_every=5 @sota_args.txt --rna_hidden=1280,512
+# python train.py --mode=pretraining --path_dir=hidden_4_2 --progress_every=1 --val_every=1 --eval_every=5 @sota_args.txt --rna_hidden=1280,512,512,512
+# python train.py --mode=pretraining --path_dir=hidden_6_2 --progress_every=1 --val_every=1 --eval_every=5 @sota_args.txt --rna_hidden=1280,512,512,512,256,256
+# python train.py --mode=pretraining --path_dir=hidden_0_3 --progress_every=1 --val_every=1 --eval_every=5 @sota_args.txt --rna_hidden=[]
+# python train.py --mode=pretraining --path_dir=hidden_2_3 --progress_every=1 --val_every=1 --eval_every=5 @sota_args.txt --rna_hidden=1280,512
+# python train.py --mode=pretraining --path_dir=hidden_4_3 --progress_every=1 --val_every=1 --eval_every=5 @sota_args.txt --rna_hidden=1280,512,512,512
+# python train.py --mode=pretraining --path_dir=hidden_6_3 --progress_every=1 --val_every=1 --eval_every=5 @sota_args.txt --rna_hidden=1280,512,512,512,256,256
+# python train.py --mode=pretraining --path_dir=hidden_0_4 --progress_every=1 --val_every=1 --eval_every=5 @sota_args.txt --rna_hidden=[]
+# python train.py --mode=pretraining --path_dir=hidden_2_4 --progress_every=1 --val_every=1 --eval_every=5 @sota_args.txt --rna_hidden=1280,512
+# python train.py --mode=pretraining --path_dir=hidden_4_4 --progress_every=1 --val_every=1 --eval_every=5 @sota_args.txt --rna_hidden=1280,512,512,512
+# python train.py --mode=pretraining --path_dir=hidden_6_4 --progress_every=1 --val_every=1 --eval_every=5 @sota_args.txt --rna_hidden=1280,512,512,512,256,256 --new_weights
+# python train.py --mode=pretraining --path_dir=hidden_0_5 --progress_every=1 --val_every=1 --eval_every=5 @sota_args.txt --rna_hidden=[]
+# python train.py --mode=pretraining --path_dir=hidden_2_5 --progress_every=1 --val_every=1 --eval_every=5 @sota_args.txt --rna_hidden=1280,512
+# python train.py --mode=pretraining --path_dir=hidden_4_5 --progress_every=1 --val_every=1 --eval_every=5 @sota_args.txt --rna_hidden=1280,512,512,512
+# python train.py --mode=pretraining --path_dir=hidden_6_5 --progress_every=1 --val_every=1 --eval_every=5 @sota_args.txt --rna_hidden=1280,512,512,512,256,256
+
+# python train.py --mode=pretraining --path_dir=twomods_1 --progress_every=1 --val_every=1 --eval_every=5 @sota_args.txt --contrastive=rna-seq,reports
+# python train.py --mode=pretraining --path_dir=twomods_2 --progress_every=1 --val_every=1 --eval_every=5 @sota_args.txt --contrastive=rna-seq,reports
+# python train.py --mode=pretraining --path_dir=twomods_3 --progress_every=1 --val_every=1 --eval_every=5 @sota_args.txt --contrastive=rna-seq,reports
+
+# python train.py --mode=pretraining --path_dir=clip_0_1 --progress_every=1 --val_every=1 --eval_every=5 @sota_args.txt --clip=-1
+# python train.py --mode=pretraining --path_dir=clip_1_1 --progress_every=1 --val_every=1 --eval_every=5 @sota_args.txt --clip=1
+# python train.py --mode=pretraining --path_dir=clip_10_1 --progress_every=1 --val_every=1 --eval_every=5 @sota_args.txt --clip=10
+# python train.py --mode=pretraining --path_dir=clip_0_2 --progress_every=1 --val_every=1 --eval_every=5 @sota_args.txt --clip=-1
+# python train.py --mode=pretraining --path_dir=clip_1_2 --progress_every=1 --val_every=1 --eval_every=5 @sota_args.txt --clip=1
+# python train.py --mode=pretraining --path_dir=clip_10_2 --progress_every=1 --val_every=1 --eval_every=5 @sota_args.txt --clip=10
+# python train.py --mode=pretraining --path_dir=clip_0_3 --progress_every=1 --val_every=1 --eval_every=5 @sota_args.txt --clip=-1
+# python train.py --mode=pretraining --path_dir=clip_1_3 --progress_every=1 --val_every=1 --eval_every=5 @sota_args.txt --clip=1
+# python train.py --mode=pretraining --path_dir=clip_10_3 --progress_every=1 --val_every=1 --eval_every=5 @sota_args.txt --clip=10
+
+# python train.py --mode=pretraining --path_dir=flatlr_1 --progress_every=1 --val_every=1 --eval_every=5 @sota_args.txt --flat_lr --warmup_epochs=1
+# python train.py --mode=pretraining --path_dir=flatlr_2 --progress_every=1 --val_every=1 --eval_every=5 @sota_args.txt --flat_lr --warmup_epochs=1
+# python train.py --mode=pretraining --path_dir=flatlr_3 --progress_every=1 --val_every=1 --eval_every=5 @sota_args.txt --flat_lr --warmup_epochs=1
+# python train.py --mode=pretraining --path_dir=cosinelr_1 --progress_every=1 --val_every=1 --eval_every=5 @sota_args.txt --cosine_lr --warmup_epochs=3
+# python train.py --mode=pretraining --path_dir=cosinelr_2 --progress_every=1 --val_every=1 --eval_every=5 @sota_args.txt --cosine_lr --warmup_epochs=3
+# python train.py --mode=pretraining --path_dir=cosinelr_3 --progress_every=1 --val_every=1 --eval_every=5 @sota_args.txt --cosine_lr --warmup_epochs=3
+
+# python train.py --mode=pretraining --path_dir=twoway_1 --progress_every=1 --val_every=1 --eval_every=5 @sota_args.txt --twoway
+# python train.py --mode=pretraining --path_dir=twoway_2 --progress_every=1 --val_every=1 --eval_every=5 @sota_args.txt --twoway
+# python train.py --mode=pretraining --path_dir=twoway_3 --progress_every=1 --val_every=1 --eval_every=5 @sota_args.txt --twoway
+# python train.py --mode=pretraining --path_dir=fourway_1 --progress_every=1 --val_every=1 --eval_every=5 @sota_args.txt --fourway
+# python train.py --mode=pretraining --path_dir=fourway_2 --progress_every=1 --val_every=1 --eval_every=5 @sota_args.txt --fourway
+# python train.py --mode=pretraining --path_dir=fourway_3 --progress_every=1 --val_every=1 --eval_every=5 @sota_args.txt --fourway
+
+# python train.py --mode=pretraining --path_dir=lrw8_20_1 --progress_every=1 --val_every=1 --eval_every=5 @sota_args.txt --twoway --lr_weight=1,2
+# python train.py --mode=pretraining --path_dir=lrw8_20_2 --progress_every=1 --val_every=1 --eval_every=5 @sota_args.txt --twoway --lr_weight=1,2
+# python train.py --mode=pretraining --path_dir=lrw8_20_3 --progress_every=1 --val_every=1 --eval_every=5 @sota_args.txt --twoway --lr_weight=1,2
+# python train.py --mode=pretraining --path_dir=lrw8_05_1 --progress_every=1 --val_every=1 --eval_every=5 @sota_args.txt --twoway --lr_weight=1,0.5
+# python train.py --mode=pretraining --path_dir=lrw8_05_2 --progress_every=1 --val_every=1 --eval_every=5 @sota_args.txt --twoway --lr_weight=1,0.5
+# python train.py --mode=pretraining --path_dir=lrw8_05_3 --progress_every=1 --val_every=1 --eval_every=5 @sota_args.txt --twoway --lr_weight=1,0.5
+
+# python train.py --mode=pretraining --path_dir=clip_1_4 --progress_every=1 --val_every=1 --eval_every=5 @sota_args.txt --clip=1
+# python train.py --mode=pretraining --path_dir=clip_10_4 --progress_every=1 --val_every=1 --eval_every=5 @sota_args.txt --clip=10
+# python train.py --mode=pretraining --path_dir=clip_1_5 --progress_every=1 --val_every=1 --eval_every=5 @sota_args.txt --clip=1
+# python train.py --mode=pretraining --path_dir=clip_10_5 --progress_every=1 --val_every=1 --eval_every=5 @sota_args.txt --clip=10
+# python train.py --mode=pretraining --path_dir=clip_1_6 --progress_every=1 --val_every=1 --eval_every=5 @sota_args.txt --clip=1
+# python train.py --mode=pretraining --path_dir=clip_10_6 --progress_every=1 --val_every=1 --eval_every=5 @sota_args.txt --clip=10
+
+# python train.py --mode=pretraining --path_dir=warmup_2_1 --progress_every=1 --val_every=1 --eval_every=5 @sota_args.txt --cosine_lr --warmup_epochs=2
+# python train.py --mode=pretraining --path_dir=warmup_2_2 --progress_every=1 --val_every=1 --eval_every=5 @sota_args.txt --cosine_lr --warmup_epochs=2
+# python train.py --mode=pretraining --path_dir=warmup_2_3 --progress_every=1 --val_every=1 --eval_every=5 @sota_args.txt --cosine_lr --warmup_epochs=2
+# python train.py --mode=pretraining --path_dir=warmup_5_1 --progress_every=1 --val_every=1 --eval_every=5 @sota_args.txt --cosine_lr --warmup_epochs=5
+# python train.py --mode=pretraining --path_dir=warmup_5_2 --progress_every=1 --val_every=1 --eval_every=5 @sota_args.txt --cosine_lr --warmup_epochs=5
+# python train.py --mode=pretraining --path_dir=warmup_5_3 --progress_every=1 --val_every=1 --eval_every=5 @sota_args.txt --cosine_lr --warmup_epochs=5
+
+# python train.py --mode=pretraining --path_dir=clinmlp_1 --progress_every=1 --val_every=1 --eval_every=5 @sota_args.txt --clin_arch=mlp
+# python train.py --mode=pretraining --path_dir=clinmlp_2 --progress_every=1 --val_every=1 --eval_every=5 @sota_args.txt --clin_arch=mlp
+# python train.py --mode=pretraining --path_dir=clinmlp_3 --progress_every=1 --val_every=1 --eval_every=5 @sota_args.txt --clin_arch=mlp
+
+# python train.py --mode=pretraining --path_dir=baseline_1 --progress_every=1 --val_every=1 --eval_every=5 @sota_args.txt
+# python train.py --mode=pretraining --path_dir=baseline_2 --progress_every=1 --val_every=1 --eval_every=5 @sota_args.txt
+# python train.py --mode=pretraining --path_dir=baseline_3 --progress_every=1 --val_every=1 --eval_every=5 @sota_args.txt
+# python train.py --mode=pretraining --path_dir=baseline_4 --progress_every=1 --val_every=1 --eval_every=5 @sota_args.txt
+# python train.py --mode=pretraining --path_dir=baseline_5 --progress_every=1 --val_every=1 --eval_every=5 @sota_args.txt
+
+# python train.py --mode=pretraining --path_dir=sitebatch_2_1 --progress_every=1 --val_every=1 --eval_every=5 @sota_args.txt --site_batch=2
+# python train.py --mode=pretraining --path_dir=sitebatch_2_2 --progress_every=1 --val_every=1 --eval_every=5 @sota_args.txt --site_batch=2
+# python train.py --mode=pretraining --path_dir=sitebatch_2_3 --progress_every=1 --val_every=1 --eval_every=5 @sota_args.txt --site_batch=2
+# python train.py --mode=pretraining --path_dir=sitebatch_5_1 --progress_every=1 --val_every=1 --eval_every=5 @sota_args.txt --site_batch=5
+# python train.py --mode=pretraining --path_dir=sitebatch_5_2 --progress_every=1 --val_every=1 --eval_every=5 @sota_args.txt --site_batch=5
+# python train.py --mode=pretraining --path_dir=sitebatch_5_3 --progress_every=1 --val_every=1 --eval_every=5 @sota_args.txt --site_batch=5
+
+# python train.py --mode=pretraining --path_dir=fourway_1 --progress_every=1 --val_every=1 --eval_every=5 @args.txt --fourway
+# python train.py --mode=pretraining --path_dir=fourway_2 --progress_every=1 --val_every=1 --eval_every=5 @args.txt --fourway
+# python train.py --mode=pretraining --path_dir=fourway_3 --progress_every=1 --val_every=1 --eval_every=5 @args.txt --fourway
+# python train.py --mode=pretraining --path_dir=fourway_4 --progress_every=1 --val_every=1 --eval_every=5 @args.txt --fourway
+# python train.py --mode=pretraining --path_dir=fourway_5 --progress_every=1 --val_every=1 --eval_every=5 @args.txt --fourway
+
+# python train.py --mode=pretraining --path_dir=lrw8_15_1 --progress_every=1 --val_every=1 --eval_every=5 @args.txt --twoway --lr_weight=1,1.5
+# python train.py --mode=pretraining --path_dir=lrw8_15_2 --progress_every=1 --val_every=1 --eval_every=5 @args.txt --twoway --lr_weight=1,1.5
+# python train.py --mode=pretraining --path_dir=lrw8_15_3 --progress_every=1 --val_every=1 --eval_every=5 @args.txt --twoway --lr_weight=1,1.5
+# python train.py --mode=pretraining --path_dir=lrw8_40_3 --progress_every=1 --val_every=1 --eval_every=5 @args.txt --twoway --lr_weight=0.5,2
+# python train.py --mode=pretraining --path_dir=lrw8_40_3 --progress_every=1 --val_every=1 --eval_every=5 @args.txt --twoway --lr_weight=0.5,2
+# python train.py --mode=pretraining --path_dir=lrw8_40_3 --progress_every=1 --val_every=1 --eval_every=5 @args.txt --twoway --lr_weight=0.5,2
+
+# python train.py --mode=pretraining --path_dir=llr0_15_1 --progress_every=1 --val_every=1 --eval_every=5 @sota_args.txt --l_lr=1e-5,0.001
+# python train.py --mode=pretraining --path_dir=llr0_15_2 --progress_every=1 --val_every=1 --eval_every=5 @sota_args.txt --l_lr=1e-5,0.001
+# python train.py --mode=pretraining --path_dir=llr0_15_3 --progress_every=1 --val_every=1 --eval_every=5 @sota_args.txt --l_lr=1e-5,0.001
+# python train.py --mode=pretraining --path_dir=llr0_35_1 --progress_every=1 --val_every=1 --eval_every=5 @sota_args.txt --l_lr=3e-5,0.001
+# python train.py --mode=pretraining --path_dir=llr0_35_2 --progress_every=1 --val_every=1 --eval_every=5 @sota_args.txt --l_lr=3e-5,0.001
+# python train.py --mode=pretraining --path_dir=llr0_35_3 --progress_every=1 --val_every=1 --eval_every=5 @sota_args.txt --l_lr=3e-5,0.001
+# python train.py --mode=pretraining --path_dir=llr1_53_1 --progress_every=1 --val_every=1 --eval_every=5 @sota_args.txt --l_lr=2e-5,0.005
+# python train.py --mode=pretraining --path_dir=llr1_53_2 --progress_every=1 --val_every=1 --eval_every=5 @sota_args.txt --l_lr=2e-5,0.005
+# python train.py --mode=pretraining --path_dir=llr1_53_3 --progress_every=1 --val_every=1 --eval_every=5 @sota_args.txt --l_lr=2e-5,0.005
+# python train.py --mode=pretraining --path_dir=llr1_14_1 --progress_every=1 --val_every=1 --eval_every=5 @sota_args.txt --l_lr=2e-5,0.0001
+# python train.py --mode=pretraining --path_dir=llr1_14_2 --progress_every=1 --val_every=1 --eval_every=5 @sota_args.txt --l_lr=2e-5,0.0001
+# python train.py --mode=pretraining --path_dir=llr1_14_3 --progress_every=1 --val_every=1 --eval_every=5 @sota_args.txt --l_lr=2e-5,0.0001
+# python train.py --mode=pretraining --path_dir=glr_53_1 --progress_every=1 --val_every=1 --eval_every=5 @sota_args.txt --g_lr=0.005
+# python train.py --mode=pretraining --path_dir=glr_53_2 --progress_every=1 --val_every=1 --eval_every=5 @sota_args.txt --g_lr=0.005
+# python train.py --mode=pretraining --path_dir=glr_53_3 --progress_every=1 --val_every=1 --eval_every=5 @sota_args.txt --g_lr=0.005
+# python train.py --mode=pretraining --path_dir=glr_14_1 --progress_every=1 --val_every=1 --eval_every=5 @sota_args.txt --g_lr=0.0001
+# python train.py --mode=pretraining --path_dir=glr_14_2 --progress_every=1 --val_every=1 --eval_every=5 @sota_args.txt --g_lr=0.0001
+# python train.py --mode=pretraining --path_dir=glr_14_3 --progress_every=1 --val_every=1 --eval_every=5 @sota_args.txt --g_lr=0.0001
+# python train.py --mode=pretraining --path_dir=clr_54_1 --progress_every=1 --val_every=1 --eval_every=5 @sota_args.txt --c_lr=0.0005
+# python train.py --mode=pretraining --path_dir=clr_54_2 --progress_every=1 --val_every=1 --eval_every=5 @sota_args.txt --c_lr=0.0005
+# python train.py --mode=pretraining --path_dir=clr_54_3 --progress_every=1 --val_every=1 --eval_every=5 @sota_args.txt --c_lr=0.0005
+# python train.py --mode=pretraining --path_dir=clr_15_1 --progress_every=1 --val_every=1 --eval_every=5 @sota_args.txt --c_lr=0.00001
+# python train.py --mode=pretraining --path_dir=clr_15_2 --progress_every=1 --val_every=1 --eval_every=5 @sota_args.txt --c_lr=0.00001
+# python train.py --mode=pretraining --path_dir=clr_15_3 --progress_every=1 --val_every=1 --eval_every=5 @sota_args.txt --c_lr=0.00001
+
+# python train.py --mode=pretraining --path_dir=temp_05_1 --progress_every=1 --val_every=1 --eval_every=5 @sota_args.txt --temp=0.05
+# python train.py --mode=pretraining --path_dir=temp_05_2 --progress_every=1 --val_every=1 --eval_every=5 @sota_args.txt --temp=0.05
+# python train.py --mode=pretraining --path_dir=temp_05_3 --progress_every=1 --val_every=1 --eval_every=5 @sota_args.txt --temp=0.05
+# python train.py --mode=pretraining --path_dir=temp_15_1 --progress_every=1 --val_every=1 --eval_every=5 @sota_args.txt --temp=0.15
+# python train.py --mode=pretraining --path_dir=temp_15_2 --progress_every=1 --val_every=1 --eval_every=5 @sota_args.txt --temp=0.15
+# python train.py --mode=pretraining --path_dir=temp_15_3 --progress_every=1 --val_every=1 --eval_every=5 @sota_args.txt --temp=0.15
+# python train.py --mode=pretraining --path_dir=temp_25_1 --progress_every=1 --val_every=1 --eval_every=5 @sota_args.txt --temp=0.25
+# python train.py --mode=pretraining --path_dir=temp_25_2 --progress_every=1 --val_every=1 --eval_every=5 @sota_args.txt --temp=0.25
+# python train.py --mode=pretraining --path_dir=temp_25_3 --progress_every=1 --val_every=1 --eval_every=5 @sota_args.txt --temp=0.25
+
+# python train.py --mode=pretraining --path_dir=cdepth_3_1 --progress_every=1 --val_every=1 --eval_every=5 @sota_args.txt --cdepth=3
+# python train.py --mode=pretraining --path_dir=cdepth_3_2 --progress_every=1 --val_every=1 --eval_every=5 @sota_args.txt --cdepth=3
+# python train.py --mode=pretraining --path_dir=cdepth_3_3 --progress_every=1 --val_every=1 --eval_every=5 @sota_args.txt --cdepth=3
+# python train.py --mode=pretraining --path_dir=cdepth_5_1 --progress_every=1 --val_every=1 --eval_every=5 @sota_args.txt --cdepth=5
+# python train.py --mode=pretraining --path_dir=cdepth_5_2 --progress_every=1 --val_every=1 --eval_every=5 @sota_args.txt --cdepth=5
+# python train.py --mode=pretraining --path_dir=cdepth_5_3 --progress_every=1 --val_every=1 --eval_every=5 @sota_args.txt --cdepth=5
+
+# python train.py --mode=pretraining --path_dir=cheads_4_1 --progress_every=1 --val_every=1 --eval_every=5 @sota_args.txt --cheads=4
+# python train.py --mode=pretraining --path_dir=cheads_4_2 --progress_every=1 --val_every=1 --eval_every=5 @sota_args.txt --cheads=4
+python train.py --mode=pretraining --path_dir=cheads_4_3 --progress_every=1 --val_every=1 --eval_every=5 @sota_args.txt --cheads=4
+python train.py --mode=pretraining --path_dir=cheads_8_1 --progress_every=1 --val_every=1 --eval_every=5 @sota_args.txt --cheads=8
+python train.py --mode=pretraining --path_dir=cheads_8_2 --progress_every=1 --val_every=1 --eval_every=5 @sota_args.txt --cheads=8
+python train.py --mode=pretraining --path_dir=cheads_8_3 --progress_every=1 --val_every=1 --eval_every=5 @sota_args.txt --cheads=8
+
+python train.py --mode=pretraining --path_dir=nocombine_1 --progress_every=1 --val_every=1 --eval_every=5 @sota_args.txt --nocombine
+python train.py --mode=pretraining --path_dir=nocombine_2 --progress_every=1 --val_every=1 --eval_every=5 @sota_args.txt --nocombine
+python train.py --mode=pretraining --path_dir=nocombine_3 --progress_every=1 --val_every=1 --eval_every=5 @sota_args.txt --nocombine
+python train.py --mode=pretraining --path_dir=interattn_1 --progress_every=1 --val_every=1 --eval_every=5 @sota_args.txt --inter_attn
+python train.py --mode=pretraining --path_dir=interattn_2 --progress_every=1 --val_every=1 --eval_every=5 @sota_args.txt --inter_attn
+python train.py --mode=pretraining --path_dir=interattn_3 --progress_every=1 --val_every=1 --eval_every=5 @sota_args.txt --inter_attn
+
+python train.py --mode=pretraining --path_dir=clin_hidden_1_1 --progress_every=1 --val_every=1 --eval_every=5 @sota_args.txt --clin_hidden=512 --clin_arch=mlp
+python train.py --mode=pretraining --path_dir=clin_hidden_1_2 --progress_every=1 --val_every=1 --eval_every=5 @sota_args.txt --clin_hidden=512 --clin_arch=mlp
+python train.py --mode=pretraining --path_dir=clin_hidden_1_3 --progress_every=1 --val_every=1 --eval_every=5 @sota_args.txt --clin_hidden=512 --clin_arch=mlp
+python train.py --mode=pretraining --path_dir=clin_hidden_2_1 --progress_every=1 --val_every=1 --eval_every=5 @sota_args.txt --clin_hidden=512,512 --clin_arch=mlp
+python train.py --mode=pretraining --path_dir=clin_hidden_2_2 --progress_every=1 --val_every=1 --eval_every=5 @sota_args.txt --clin_hidden=512,512 --clin_arch=mlp
+python train.py --mode=pretraining --path_dir=clin_hidden_2_3 --progress_every=1 --val_every=1 --eval_every=5 @sota_args.txt --clin_hidden=512,512 --clin_arch=mlp
+python train.py --mode=pretraining --path_dir=clin_hidden_3_1 --progress_every=1 --val_every=1 --eval_every=5 @sota_args.txt --clin_hidden=512,512,512 --clin_arch=mlp
+python train.py --mode=pretraining --path_dir=clin_hidden_3_2 --progress_every=1 --val_every=1 --eval_every=5 @sota_args.txt --clin_hidden=512,512,512 --clin_arch=mlp
+python train.py --mode=pretraining --path_dir=clin_hidden_3_3 --progress_every=1 --val_every=1 --eval_every=5 @sota_args.txt --clin_hidden=512,512,512 --clin_arch=mlp
+
+python train.py --mode=pretraining --path_dir=cdropout_0_1 --progress_every=1 --val_every=1 --eval_every=5 @sota_args.txt --cdropout=0
+python train.py --mode=pretraining --path_dir=cdropout_0_2 --progress_every=1 --val_every=1 --eval_every=5 @sota_args.txt --cdropout=0
+python train.py --mode=pretraining --path_dir=cdropout_0_3 --progress_every=1 --val_every=1 --eval_every=5 @sota_args.txt --cdropout=0
+python train.py --mode=pretraining --path_dir=cdropout_05_1 --progress_every=1 --val_every=1 --eval_every=5 @sota_args.txt --cdropout=0.05
+python train.py --mode=pretraining --path_dir=cdropout_05_2 --progress_every=1 --val_every=1 --eval_every=5 @sota_args.txt --cdropout=0.05
+python train.py --mode=pretraining --path_dir=cdropout_05_3 --progress_every=1 --val_every=1 --eval_every=5 @sota_args.txt --cdropout=0.05
+python train.py --mode=pretraining --path_dir=cdropout_02_1 --progress_every=1 --val_every=1 --eval_every=5 @sota_args.txt --cdropout=0.2
+python train.py --mode=pretraining --path_dir=cdropout_02_2 --progress_every=1 --val_every=1 --eval_every=5 @sota_args.txt --cdropout=0.2
+python train.py --mode=pretraining --path_dir=cdropout_02_3 --progress_every=1 --val_every=1 --eval_every=5 @sota_args.txt --cdropout=0.2
+
+python train.py --mode=pretraining --path_dir=cdims_16_1 --progress_every=1 --val_every=1 --eval_every=5 @sota_args.txt --cdims=16
+python train.py --mode=pretraining --path_dir=cdims_16_2 --progress_every=1 --val_every=1 --eval_every=5 @sota_args.txt --cdims=16
+python train.py --mode=pretraining --path_dir=cdims_16_3 --progress_every=1 --val_every=1 --eval_every=5 @sota_args.txt --cdims=16
+python train.py --mode=pretraining --path_dir=cdims_64_1 --progress_every=1 --val_every=1 --eval_every=5 @sota_args.txt --cdims=64
+python train.py --mode=pretraining --path_dir=cdims_64_2 --progress_every=1 --val_every=1 --eval_every=5 @sota_args.txt --cdims=64
+python train.py --mode=pretraining --path_dir=cdims_64_3 --progress_every=1 --val_every=1 --eval_every=5 @sota_args.txt --cdims=64
+
+python train.py --mode=pretraining --path_dir=rthresh_9_1 --progress_every=1 --val_every=1 --eval_every=5 @sota_args.txt --rthresh=0.9
+python train.py --mode=pretraining --path_dir=rthresh_9_2 --progress_every=1 --val_every=1 --eval_every=5 @sota_args.txt --rthresh=0.9
+python train.py --mode=pretraining --path_dir=rthresh_9_3 --progress_every=1 --val_every=1 --eval_every=5 @sota_args.txt --rthresh=0.9
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
