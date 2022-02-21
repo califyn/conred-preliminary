@@ -1,6 +1,6 @@
 Here is my code for ConRED, a **con**trastive **R**NA-**e**xpression and pathological **d**iagnosis matcher.
 
-Preliminary results were submitted to the Regeneron Science Talent Search.
+This is a preliminary draft.
 Research is ongoing.
 
 Code is primarily in these three files (all in the ``code`` directory):
